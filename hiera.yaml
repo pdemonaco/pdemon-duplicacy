@@ -1,0 +1,13 @@
+---
+version: 5
+defaults:
+  datadir: data
+  data_hash: yaml_data
+hierarchy:
+
+  - name: "OS/Platform"
+    paths:
+      - "os/%{facts.os.family}-family.yaml"
+
+  - name: "Common data"
+    path: "common.yaml"

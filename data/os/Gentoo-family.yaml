@@ -1,0 +1,2 @@
+---
+duplicacy::package_name: [ 'app-backup/duplicacy-bin' ]
