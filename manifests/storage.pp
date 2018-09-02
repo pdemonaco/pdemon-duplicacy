@@ -10,8 +10,8 @@
 #     path                 => '/mnt/backup/my/directory',
 #     target               => {
 #       url                => 'b2://duplicacy-primary',
-#       b2_account_id      => 'my-account-id-here',
-#       b2_application_key => 'this-app-key-here',
+#       b2_id      => 'my-account-id-here',
+#       b2_app_key => 'this-app-key-here',
 #     },
 #     encryption    => {
 #       password    => 'super-secret-password',
@@ -50,8 +50,8 @@
 #     * 'url' - the url to provide to the init command
 #
 #   b2 specific arguments
-#     * `b2_account_id` - ID from your b2 account
-#     * `b2_application_key` - the application key you generated for this bucket
+#     * `b2_id` - ID from your b2 account
+#     * `b2_app_key` - the application key you generated for this bucket
 #
 # @param chunk_parameters [Hash]
 #   This hash includes three parameters defining how chunks are handled. The
@@ -142,13 +142,13 @@ define duplicacy::storage (
   # details
   case $storage_url {
     /^b2:/: {
-      if !('b2_account_id' in $target) {
-        fail("\$b2_account_id is mandatory for ${storage_url}")
-      } elsif !('b2_application_key' in $target) {
-        fail("\$b2_application_key is mandatory for ${storage_url}")
+      if !('b2_id' in $target) {
+        fail("\$b2_id is mandatory for ${storage_url}")
+      } elsif !('b2_app_key' in $target) {
+        fail("\$b2_app_key is mandatory for ${storage_url}")
       }
-      $b2_id = $target['b2_account_id']
-      $b2_app_key = $target['b2_application_key']
+      $b2_id = $target['b2_id']
+      $b2_app_key = $target['b2_app_key']
       $env_storage = [
         "${env_prefix}_B2_ID=${b2_id}",
         "${env_prefix}_B2_KEY=${b2_app_key}"

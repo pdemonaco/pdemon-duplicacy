@@ -11,8 +11,8 @@ describe 'duplicacy::storage' do
         'path'    => '/my/super/safe/data',
         'target'  => {
           'url'           => 'b2://test-storage',
-          'b2_account_id' => 'this-is-my-accound-id',
-          'b2_application_key' => 'this-is-my-key',
+          'b2_id' => 'this-is-my-accound-id',
+          'b2_app_key' => 'this-is-my-key',
         },
         'encryption' => {
           'garbage' => 'this-should-be-password',
@@ -81,12 +81,12 @@ describe 'duplicacy::storage' do
         'path'    => '/my/super/safe/data',
         'target' => {
           'url' => 'b2://no-params',
-          'b2_application_key' => 'not-enough',
+          'b2_app_key' => 'not-enough',
         },
       }
     end
 
-    it { is_expected.to raise_error(Puppet::PreformattedError, %r{\$b2_account_id is mandatory for }) }
+    it { is_expected.to raise_error(Puppet::PreformattedError, %r{\$b2_id is mandatory for }) }
   end
 
   context 'b2 missing application_key' do
@@ -98,12 +98,12 @@ describe 'duplicacy::storage' do
         'path'    => '/my/super/safe/data',
         'target' => {
           'url' => 'b2://no-params',
-          'b2_account_id' => 'not-enough',
+          'b2_id' => 'not-enough',
         },
       }
     end
 
-    it { is_expected.to raise_error(Puppet::PreformattedError, %r{\$b2_application_key is mandatory for }) }
+    it { is_expected.to raise_error(Puppet::PreformattedError, %r{\$b2_app_key is mandatory for }) }
   end
 
   # Valid configuration with defaults where possible
@@ -116,8 +116,8 @@ describe 'duplicacy::storage' do
         'path'    => '/my/super/safe/data',
         'target'  => {
           'url' => 'b2://test-storage',
-          'b2_account_id' => 'this-is-my-accound-id',
-          'b2_application_key' => 'this-is-my-key',
+          'b2_id' => 'this-is-my-accound-id',
+          'b2_app_key' => 'this-is-my-key',
         },
         'encryption' => {
           'password' => 'secret-sauce',
@@ -156,8 +156,8 @@ describe 'duplicacy::storage' do
         'path'    => '/my/super/safe/data',
         'target'  => {
           'url' => 'b2://test-storage',
-          'b2_account_id' => 'this-is-my-accound-id',
-          'b2_application_key' => 'this-is-my-key',
+          'b2_id' => 'this-is-my-accound-id',
+          'b2_app_key' => 'this-is-my-key',
         },
         'encryption' => {
           'password' => 'secret-sauce',
