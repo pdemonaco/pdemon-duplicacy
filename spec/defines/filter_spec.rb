@@ -32,6 +32,9 @@ describe 'duplicacy::filter' do
     # Filter file should be created
     it { is_expected.to contain_file('/my/repo/dir/filters').with_ensure('file').with_owner('me').with_group('me').with_mode('0644') }
 
+    # There should be two rules
+    it { is_expected.to have_file_line_resource_count(2) }
+
     # Rule lines should exist which depend on the file
     it { is_expected.to contain_file_line('rule_0').that_requires('File[/my/repo/dir/filters]') }
     it { is_expected.to contain_file_line('rule_1').that_requires(['File[/my/repo/dir/filters]', 'File_line[rule_0]']) }
