@@ -22,7 +22,7 @@ describe 'duplicacy::filter' do
       {
         'pref_dir' => '/my/repo/dir',
         'user' => 'me',
-        'filter_entries' => [
+        'rules' => [
           '+foo/bar/*',
           '-*',
         ],

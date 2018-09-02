@@ -6,7 +6,7 @@
 #   duplicacy::filter { 'my-repo_filters':
 #     $pref_dir       => '/my/repo/dir/.duplicacy',
 #     $user           => 'me',
-#     $filter_entries => [ 
+#     $rules => [ 
 #       '+foo/bar/*',
 #       '-*',
 #     ],
@@ -20,17 +20,17 @@
 #   Who should own this file? Typically this is also who runs the backups and
 #   owns the associated data.
 #
-# @filter_entries [Array]
+# @rules [Array]
 #   An array of strings which each correspond to a line of the filter file. See
 #   the https://github.com/gilbertchen/duplicacy/wiki/Include-Exclude-Patterns
 #   page for more detail.
 define duplicacy::filter(
   String $pref_dir = undef,
   String $user = undef,
-  Array[String] $filter_entries = [],
+  Array[String] $rules = [],
 ) {
   # 
-  if empty($filter_entries) {
+  if empty($rules) {
     fail('At least one filter entry must be provided!')
   }
 
@@ -44,7 +44,7 @@ define duplicacy::filter(
   }
 
   # Create all of the specified rules
-  $filter_entries.each | $index, $value | {
+  $rules.each | $index, $value | {
     # All but the first rule depend on previous rules
     if ($index == 0) {
       file_line { "rule_${index}":
