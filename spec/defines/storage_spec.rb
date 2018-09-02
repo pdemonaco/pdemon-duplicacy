@@ -10,7 +10,7 @@ describe 'duplicacy::storage' do
         'repo_id' => 'test_repo',
         'path'    => '/my/super/safe/data',
         'target'  => {
-          'url'           => 'b2://test-storage',
+          'url' => 'b2://test-storage',
           'b2_id' => 'this-is-my-accound-id',
           'b2_app_key' => 'this-is-my-key',
         },
@@ -146,8 +146,54 @@ describe 'duplicacy::storage' do
     }
   end
 
-  # Attempt to build on each OS
-  context 'test-build' do
+  # Fully specified values
+  context 'valid with full specification' do
+    let(:title) { 'my-repo_default' }
+    let(:params) do
+      {
+        'storage_name' => 'default',
+        'repo_id' => 'my-repo',
+        'path'    => '/my/super/safe/data',
+        'target'  => {
+          'url' => 'b2://test-storage',
+          'b2_id' => 'this-is-my-accound-id',
+          'b2_app_key' => 'this-is-my-key',
+        },
+        'encryption' => {
+          'password' => 'secret-sauce',
+          'iterations' => '32768',
+        },
+        'chunk_parameters' => {
+          'size' => 4_194_304,
+          'max' => 16_777_216,
+          'min' => 1_048_576,
+        },
+      }
+    end
+
+    # Ensure it compiles
+    it { is_expected.to compile }
+
+    # Validate the command
+    it { is_expected.to contain_exec('init_my-repo_default').with_command(%r{duplicacy init -e -iterations 32768 -c 4194304 -max 16777216 -min 1048576 default b2://test-storage}) }
+
+    # Validate the working directory
+    it { is_expected.to contain_exec('init_my-repo_default').with_cwd('/my/super/safe/data') }
+
+    # Validate the environment
+    it {
+      is_expected.to contain_exec('init_my-repo_default').with_environment(
+        [
+          'DUPLICACY_PASSWORD=secret-sauce',
+          'DUPLICACY_B2_ID=this-is-my-accound-id',
+          'DUPLICACY_B2_KEY=this-is-my-key',
+        ],
+      )
+    }
+  end
+
+  # Only size is specified
+  context 'calculated chunk min and max values' do
     let(:title) { 'my-repo_default' }
     let(:params) do
       {
@@ -162,15 +208,30 @@ describe 'duplicacy::storage' do
         'encryption' => {
           'password' => 'secret-sauce',
         },
+        'chunk_parameters' => {
+          'size' => 8_388_608,
+        },
       }
     end
 
-    on_supported_os.each do |os, os_facts|
-      context "on #{os}" do
-        let(:facts) { os_facts }
+    # Ensure it compiles
+    it { is_expected.to compile }
 
-        it { is_expected.to compile }
-      end
-    end
+    # Validate the command
+    it { is_expected.to contain_exec('init_my-repo_default').with_command(%r{duplicacy init -e -c 8388608 -max 33554432 -min 2097152 default b2://test-storage}) }
+
+    # Validate the working directory
+    it { is_expected.to contain_exec('init_my-repo_default').with_cwd('/my/super/safe/data') }
+
+    # Validate the environment
+    it {
+      is_expected.to contain_exec('init_my-repo_default').with_environment(
+        [
+          'DUPLICACY_PASSWORD=secret-sauce',
+          'DUPLICACY_B2_ID=this-is-my-accound-id',
+          'DUPLICACY_B2_KEY=this-is-my-key',
+        ],
+      )
+    }
   end
 end

@@ -120,7 +120,7 @@ define duplicacy::storage (
     } else {
       $chunk_size_min = $chunk_size / 4
     }
-    $cmd_chunks = "-chunk-size ${chunk_size} -max-chunk-size ${chunk_size_max} -min-chunk-size ${chunk_size_min}"
+    $cmd_chunks = " -c ${chunk_size} -max ${chunk_size_max} -min ${chunk_size_min}"
   } else {
     $cmd_chunks = ''
   }
