@@ -96,6 +96,7 @@ define duplicacy::storage (
     }
   } else {
     $cmd_encryption = ''
+    $env_encryption = []
   }
 
   # Process chunk arguments

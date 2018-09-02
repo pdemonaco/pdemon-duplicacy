@@ -105,6 +105,41 @@ describe 'duplicacy::storage' do
 
     it { is_expected.to raise_error(Puppet::PreformattedError, %r{\$b2_app_key is mandatory for }) }
   end
+  
+  context 'b2 without encryption' do
+    let(:title) { 'test_storage' }
+    let(:params) do
+      {
+        'storage_name' => 'test_storage',
+        'repo_id' => 'my-repo',
+        'path'    => '/my/super/safe/data',
+        'target' => {
+          'url' => 'b2://no-params',
+          'b2_id' => 'my-id',
+          'b2_app_key' => 'my-app-key',
+        },
+      }
+    end
+
+    it { is_expected.to compile }
+
+    # Validate the command
+    it { is_expected.to contain_exec('init_my-repo_test_storage').with_command(%r{duplicacy init test_storage b2://no-params}) }
+
+    # Validate the working directory
+    it { is_expected.to contain_exec('init_my-repo_test_storage').with_cwd('/my/super/safe/data') }
+
+    # Validate the environment
+    it {
+      is_expected.to contain_exec('init_my-repo_test_storage').with_environment(
+        [
+          'DUPLICACY_test_storage_B2_ID=my-id',
+          'DUPLICACY_test_storage_B2_KEY=my-app-key',
+        ],
+      )
+    }
+  end
+
 
   # Valid configuration with defaults where possible
   context 'valid using default values' do
