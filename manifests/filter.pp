@@ -29,6 +29,10 @@ define duplicacy::filter(
   String $user = undef,
   Array[String] $filter_entries = [],
 ) {
+  # 
+  if empty($filter_entries) {
+    fail('At least one filter entry must be provided!')
+  }
 
   # Make sure the file in question exists!
   $filter_file = "${pref_dir}/filters"
@@ -41,13 +45,25 @@ define duplicacy::filter(
 
   # Create all of the specified rules
   $filter_entries.each | $index, $value | {
-    $rule_name = "filter_rule_${index}"
-    file_line { $rule_name:
-      path    => $filter_file,
-      line    => $value,
-      require => [
-        File[$filter_file],
-      ],
+    # All but the first rule depend on previous rules
+    if ($index == 0) {
+      file_line { "rule_${index}":
+        path    => $filter_file,
+        line    => $value,
+        require => [
+          File[$filter_file],
+        ],
+      }
+    } else {
+      $previous = $index - 1
+      file_line { "rule_${index}":
+        path    => $filter_file,
+        line    => $value,
+        require => [
+          File[$filter_file],
+          File_line["rule_${previous}"],
+        ],
+      }
     }
   }
 }
