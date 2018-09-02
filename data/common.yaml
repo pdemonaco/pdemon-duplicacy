@@ -1,0 +1,5 @@
+---
+duplicacy::package_name: 'duplicacy'
+
+lookup_options:
+
