@@ -34,6 +34,9 @@
 # @param $path [String]
 #   Directory in which this particular repository resides on this machine. 
 #
+# @param $user [String]
+#   User to whom this repository belongs.
+#
 # @param encrption [Hash]
 #   This hash includes two key parameters related to encryption.
 #     * `password` - this is the password used to encrypt the config file
@@ -63,20 +66,17 @@ define duplicacy::storage (
   String $storage_name = undef,
   String $repo_id = undef,
   String $path = undef,
+  String $user = undef,
   Hash[String, Variant[String, Integer]] $target = {},
   Optional[Hash[String, Variant[String, Integer]]] $encryption = {},
   Optional[Hash[String, Integer]] $chunk_parameters = {},
 ) {
+  # Declare the base command
   if ($storage_name == 'default') {
-    $default_storage = true
     $env_prefix = 'DUPLICACY'
   } else {
-    $default_storage = false
     $env_prefix = "DUPLICACY_${storage_name}"
   }
-
-  # Declare the base command
-  $cmd_base = '/usr/bin/duplicacy init'
 
   # Process encryption parameters
   if !empty($encryption) {
@@ -95,6 +95,7 @@ define duplicacy::storage (
       $cmd_encryption = ' -e'
     }
   } else {
+    $password = undef
     $cmd_encryption = ''
     $env_encryption = []
   }
@@ -109,6 +110,7 @@ define duplicacy::storage (
     }
 
     # Default the max to size * 4
+
     if 'max' in $chunk_parameters {
       $chunk_size_max = $chunk_parameters['max']
     } else {
@@ -154,20 +156,60 @@ define duplicacy::storage (
         "${env_prefix}_B2_ID=${b2_id}",
         "${env_prefix}_B2_KEY=${b2_app_key}"
       ]
-      $cmd_args = " ${storage_name} ${storage_url}"
+      $cmd_args = " ${repo_id} ${storage_url}"
+      $file_template = 'duplicacy/b2_env.sh.epp'
+      $file_argument = {
+        'storage_name' => upcase($storage_name),
+        'password'     => $password,
+        'b2_id'        => $b2_id,
+        'b2_app_key'   => $b2_app_key,
+      }
     }
     default: {
       fail("Unrecognized url: ${storage_url}")
     }
   }
 
+  # Create the environment file
+  file { "env_script_${repo_id}_${storage_name}":
+    ensure  => file,
+    path    => "${path}/.duplicacy/scripts/${storage_name}.env",
+    content => epp($file_template, $file_argument),
+    owner   => $user,
+    group   => $user,
+    mode    => '0600',
+  }
+
   # Initialize the storage for this repository
-  $repo_init_command = "${cmd_base}${cmd_encryption}${cmd_chunks}${cmd_args}"
-  $repo_init_env = $env_encryption + $env_storage
-  exec { "init_${repo_id}_${storage_name}":
-    command     => $repo_init_command,
-    cwd         => $path,
-    creates     => "${path}/cache/${storage_name}",
-    environment => $repo_init_env,
+  $repo_env = $env_encryption + $env_storage
+  if $env_prefix =~ /DUPLICACY$/ {
+    $cmd_base = 'duplicacy init'
+    $repo_init_command = "${cmd_base}${cmd_encryption}${cmd_chunks}${cmd_args}"
+    exec { "init_${repo_id}":
+      command     => $repo_init_command,
+      path        => '/usr/local/bin:/usr/bin:/bin',
+      cwd         => $path,
+      creates     => "${path}/.duplicacy/preferences",
+      environment => $repo_env,
+    }
+  } else {
+    $cmd_base = 'duplicacy add'
+    $repo_add_command = "${cmd_base}${cmd_encryption}${cmd_chunks} ${storage_name}${cmd_args}"
+
+    # Build the test command to check if the storage has already been added to
+    # the preferences file
+    $test_sed = "sed -e 's/\"//g' ${path}/duplicacy/preferences"
+    $test_awk = "awk '/name/ {print \$2}'"
+    $test_grep = "grep ${storage_name}"
+    exec { "add_${repo_id}_${storage_name}":
+      command     => $repo_add_command,
+      path        => '/usr/local/bin:/usr/bin:/bin',
+      cwd         => $path,
+      onlyif      => [
+        "test -f ${path}/.duplicacy/preferences",
+        "test 0 -eq \$(${test_sed} | ${test_awk} | ${test_grep} | wc -l)",
+      ],
+      environment => $repo_env,
+    }
   }
 }

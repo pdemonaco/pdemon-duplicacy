@@ -1,16 +1,163 @@
 require 'spec_helper'
 
 describe 'duplicacy::repository' do
-  let(:title) { 'namevar' }
-  let(:params) do
-    {}
+  let(:title) { 'my-repo' }
+
+  # No storage targets specified
+  context 'Missing Targets' do
+    let(:params) do
+      {
+        'path' => '/my/backup/dir',
+        'storage_targets' => {},
+      }
+    end
+
+    it { is_expected.to compile.and_raise_error(%r{At least one target must be specified!}) }
   end
 
-  on_supported_os.each do |os, os_facts|
-    context "on #{os}" do
-      let(:facts) { os_facts }
-
-      it { is_expected.to compile }
+  # No default storage specified
+  context 'No Default Storage' do
+    let(:params) do
+      {
+        'path' => '/my/backup/dir',
+        'storage_targets' => {
+          'storage1' => {},
+          'storage2' => {},
+        },
+      }
     end
+
+    it { is_expected.to compile.and_raise_error(%r{A storage target named 'default' must be defined!}) }
+  end
+
+  # One valid storage
+  context 'single valid storage' do
+    let(:params) do
+      {
+        'path' => '/my/backup/dir',
+        'storage_targets' => {
+          'default' => {
+            'target' => {
+              'url' => 'b2://my-bucket',
+              'b2_id' => 'my-id',
+              'b2_app_key' => 'my-key',
+            },
+            'encryption' => {
+              'password' => 'batman',
+            },
+          },
+        },
+      }
+    end
+
+    it { is_expected.to compile }
+
+    # One storage repo
+    it { is_expected.to have_duplicacy__storage_resource_count(1) }
+    it { is_expected.to contain_duplicacy__storage('my-repo_default').with_storage_name('default') }
+
+    # No filters
+    it { is_expected.to have_duplicacy__filter_resource_count(0) }
+  end
+
+  # One valid storage with filters
+  context 'single valid storage with filters' do
+    let(:params) do
+      {
+        'path' => '/my/backup/dir',
+        'storage_targets' => {
+          'default' => {
+            'target' => {
+              'url' => 'b2://my-bucket',
+              'b2_id' => 'my-id',
+              'b2_app_key' => 'my-key',
+            },
+            'encryption' => {
+              'password' => 'batman',
+            },
+          },
+        },
+        'filter_rules' => [
+          '+foo/baz/*',
+          '-*',
+        ],
+      }
+    end
+
+    it { is_expected.to compile.with_all_deps }
+
+    # There should be four files: 2 directories created here, a file in the
+    # storage, and a file in the filters
+    it { is_expected.to have_file_resource_count(4) }
+
+    # One directory should be the duplicacy folder
+    it { is_expected.to contain_file('/my/backup/dir/.duplicacy').with_ensure('directory') }
+    it { is_expected.to contain_file('/my/backup/dir/.duplicacy').with_mode('0700') }
+    it { is_expected.to contain_file('/my/backup/dir/.duplicacy').with_owner('root').with_group('root') }
+
+    # One directory should be the scripts folder
+    it { is_expected.to contain_file('/my/backup/dir/.duplicacy/scripts').with_ensure('directory') }
+    it { is_expected.to contain_file('/my/backup/dir/.duplicacy/scripts').with_mode('0700') }
+    it { is_expected.to contain_file('/my/backup/dir/.duplicacy/scripts').with_owner('root').with_group('root') }
+    it { is_expected.to contain_file('/my/backup/dir/.duplicacy/scripts').that_requires('File[/my/backup/dir/.duplicacy]') }
+
+    # One storage repo
+    it { is_expected.to have_duplicacy__storage_resource_count(1) }
+    it { is_expected.to contain_duplicacy__storage('my-repo_default').with_storage_name('default') }
+    it { is_expected.to contain_duplicacy__storage('my-repo_default').with_path('/my/backup/dir') }
+    it { is_expected.to contain_duplicacy__storage('my-repo_default').that_requires('File[/my/backup/dir/.duplicacy/scripts]') }
+
+    # Some filters
+    it { is_expected.to have_duplicacy__filter_resource_count(1) }
+    it { is_expected.to contain_duplicacy__filter('my-repo_filters').with_pref_dir('/my/backup/dir/.duplicacy') }
+    it { is_expected.to contain_duplicacy__filter('my-repo_filters').that_requires('Duplicacy::Storage[my-repo_default]') }
+  end
+
+  context 'two valid storages with filters' do
+    let(:params) do
+      {
+        'path' => '/my/backup/dir',
+        'storage_targets' => {
+          'default' => {
+            'target' => {
+              'url' => 'b2://my-bucket',
+              'b2_id' => 'my-id',
+              'b2_app_key' => 'my-key',
+            },
+            'encryption' => {
+              'password' => 'batman',
+            },
+          },
+          'other_bucket' => {
+            'target' => {
+              'url' => 'b2://my-second-bucket',
+              'b2_id' => 'my-other-id',
+              'b2_app_key' => 'my-second-key',
+            },
+          },
+        },
+        'filter_rules' => [
+          '+foo/baz/*',
+          '-*',
+        ],
+      }
+    end
+
+    it { is_expected.to compile.with_all_deps }
+
+    # One storage repo
+    it { is_expected.to have_duplicacy__storage_resource_count(2) }
+    it { is_expected.to contain_duplicacy__storage('my-repo_default').with_storage_name('default') }
+    it { is_expected.to contain_duplicacy__storage('my-repo_default').with_path('/my/backup/dir') }
+    it { is_expected.to contain_duplicacy__storage('my-repo_other_bucket').with_storage_name('other_bucket') }
+
+    # The second storage sholud depend on default we need to initialize before
+    # we can add
+    it { is_expected.to contain_duplicacy__storage('my-repo_other_bucket').that_requires('Duplicacy::Storage[my-repo_default]') }
+
+    # Some filters
+    it { is_expected.to have_duplicacy__filter_resource_count(1) }
+    it { is_expected.to contain_duplicacy__filter('my-repo_filters').with_pref_dir('/my/backup/dir/.duplicacy') }
+    it { is_expected.to contain_duplicacy__filter('my-repo_filters').that_requires('Duplicacy::Storage[my-repo_default]') }
   end
 end

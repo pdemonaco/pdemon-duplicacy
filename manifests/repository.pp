@@ -4,13 +4,25 @@
 #
 # @example
 #   duplicacy::repository { 'my-repo':
-#       $path => '/path/to/the/directory',
-#       $user => 'me',
-#       $
+#     path => '/path/to/the/directory',
+#     user => 'me',
+#     storage_targets = {
+#       'default'         => {
+#         path            => '/mnt/backup/my/directory',
+#         target          => {
+#           url           => 'b2://backups-and-stuff',
+#           b2_id => 'my-id',
+#           b2_app_key    => 'my-key',
+#         },
+#         encryption => {
+#           password => 'secret-sauce',
+#         },
+#       },
+#     },
 #   }
 #
-# @param id [String]
-#   The name of this particular repository.
+# @param repo_id [String]
+#   The name of this particular repository. This is a namevar
 #
 # @param path [String]
 #   Absolute path to the directory to be backed up. Note that backup directories
@@ -27,36 +39,76 @@ define duplicacy::repository (
   String $repo_id = $name,
   String $path = undef,
   String $user = 'root',
-  Hash[String, Variant[String, Hash[String, Variant[String, Integer]]]] $storage_targets = [],
-  Optional[Array[String]] $filter_targets = [],
-  Optional[String] $pref_dir = undef,
+  Hash[String, Variant[String, Hash[String, Variant[String, Hash[String, Variant[String, Integer]]]]]] $storage_targets = {},
+  Optional[Array[String]] $filter_rules = [],
 ) {
   # TODO - actually really support alternate pref_dirs
-  if !$pref_dir {
-    $pref_dir = "${path}/.duplicacy"
-  }
+  $pref_dir = "${path}/.duplicacy"
 
-  # Initialize Storage
-  if ! 'default' in $storage_targets {
+  # Ensure storage configuration is valid
+  if empty($storage_targets) {
+    fail('At least one target must be specified!')
+  } elsif !( 'default' in $storage_targets ) {
     fail('A storage target named \'default\' must be defined!')
   }
+
+  # Create the duplicacy and scripts directories
+  file { $pref_dir:
+    ensure => directory,
+    mode   => '0700',
+    owner  => $user,
+    group  => $user,
+  }
+  file { "${pref_dir}/scripts":
+    ensure  => directory,
+    mode    => '0700',
+    owner   => $user,
+    group   => $user,
+    require => File[$pref_dir],
+  }
+
+  # Initialize the default storage
+  $default_params = $storage_targets['default']
+  duplicacy::storage { "${repo_id}_default":
+    storage_name => 'default',
+    repo_id      => $repo_id,
+    path         => $path,
+    user         => $user,
+    require      => File["${pref_dir}/scripts"],
+    *            => $default_params,
+  }
+
+  # Initialize all of the other storage targets
   $storage_targets.each | $target, $params | {
-    duplicacy::storage { $target:
-      * => $params
+    if $target != 'default' {
+      duplicacy::storage { "${repo_id}_${target}":
+        storage_name => $target,
+        repo_id      => $repo_id,
+        path         => $path,
+        user         => $user,
+        require      => [
+          Duplicacy::Storage["${repo_id}_default"],
+          File["${pref_dir}/scripts"],
+        ],
+        *            => $params
+      }
     }
   }
 
   # Configure filters
-  unless empty($filter_targets) {
+  unless empty($filter_rules) {
     duplicacy::filter { "${repo_id}_filters":
-      pref_dir       => $pref_dir,
-      user           => $user,
-      filter_targets => $filter_targets,
-      requires       => [
-        Storage['default'],
+      pref_dir => $pref_dir,
+      user     => $user,
+      rules    => $filter_rules,
+      require  => [
+        Duplicacy::Storage["${repo_id}_default"],
       ],
     }
   }
+
+  # Create script(s) for backups and prune execution?
+
   # TODO - Schedule Backups
 
   # TODO - Schedule Prunes

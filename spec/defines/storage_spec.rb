@@ -8,8 +8,9 @@ describe 'duplicacy::storage' do
       {
         'storage_name' => 'test_storage',
         'repo_id' => 'test_repo',
-        'path'    => '/my/super/safe/data',
-        'target'  => {
+        'path' => '/my/super/safe/data',
+        'user' => 'me',
+        'target' => {
           'url' => 'b2://test-storage',
           'b2_id' => 'this-is-my-accound-id',
           'b2_app_key' => 'this-is-my-key',
@@ -31,6 +32,7 @@ describe 'duplicacy::storage' do
         'storage_name' => 'test_storage',
         'repo_id' => 'test_repo',
         'path'    => '/my/super/safe/data',
+        'user' => 'me',
       }
     end
 
@@ -45,6 +47,7 @@ describe 'duplicacy::storage' do
         'storage_name' => 'test_storage',
         'repo_id' => 'test_repo',
         'path'    => '/my/super/safe/data',
+        'user' => 'me',
         'target' => {
           'garbage' => 'this should be the url',
         },
@@ -62,6 +65,7 @@ describe 'duplicacy::storage' do
         'storage_name' => 'test_storage',
         'repo_id' => 'test_repo',
         'path'    => '/my/super/safe/data',
+        'user' => 'me',
         'target' => {
           'url' => 'b3://this-isnt-a-thing',
         },
@@ -79,6 +83,7 @@ describe 'duplicacy::storage' do
         'storage_name' => 'test_storage',
         'repo_id' => 'test_repo',
         'path'    => '/my/super/safe/data',
+        'user' => 'me',
         'target' => {
           'url' => 'b2://no-params',
           'b2_app_key' => 'not-enough',
@@ -96,6 +101,7 @@ describe 'duplicacy::storage' do
         'storage_name' => 'test_storage',
         'repo_id' => 'test_repo',
         'path'    => '/my/super/safe/data',
+        'user' => 'me',
         'target' => {
           'url' => 'b2://no-params',
           'b2_id' => 'not-enough',
@@ -105,14 +111,15 @@ describe 'duplicacy::storage' do
 
     it { is_expected.to raise_error(Puppet::PreformattedError, %r{\$b2_app_key is mandatory for }) }
   end
-  
-  context 'b2 without encryption' do
+
+  context 'b2 alt storage without encryption' do
     let(:title) { 'test_storage' }
     let(:params) do
       {
         'storage_name' => 'test_storage',
         'repo_id' => 'my-repo',
         'path'    => '/my/super/safe/data',
+        'user' => 'me',
         'target' => {
           'url' => 'b2://no-params',
           'b2_id' => 'my-id',
@@ -121,17 +128,44 @@ describe 'duplicacy::storage' do
       }
     end
 
-    it { is_expected.to compile }
+    it { is_expected.to compile.with_all_deps }
 
     # Validate the command
-    it { is_expected.to contain_exec('init_my-repo_test_storage').with_command(%r{duplicacy init test_storage b2://no-params}) }
+    it { is_expected.to contain_exec('add_my-repo_test_storage').with_command(%r{duplicacy add test_storage my-repo b2://no-params}) }
+    it { is_expected.to contain_exec('add_my-repo_test_storage').with_cwd('/my/super/safe/data') }
+    it { is_expected.to contain_exec('add_my-repo_test_storage').with_path('/usr/local/bin:/usr/bin:/bin') }
 
-    # Validate the working directory
-    it { is_expected.to contain_exec('init_my-repo_test_storage').with_cwd('/my/super/safe/data') }
+    # There should be a file
+    it { is_expected.to have_file_resource_count(1) }
+    it { is_expected.to contain_file('env_script_my-repo_test_storage').with_ensure('file') }
+    it { is_expected.to contain_file('env_script_my-repo_test_storage').with_path('/my/super/safe/data/.duplicacy/scripts/test_storage.env') }
+    it {
+      is_expected.to contain_file('env_script_my-repo_test_storage').with_content(
+        [
+          '#!/bin/sh
+# Export B2 Parameters
+export DUPLICACY_TEST_STORAGE_B2_ID="my-id"
+export DUPLICACY_TEST_STORAGE_B2_KEY="my-app-key"
+',
+        ],
+      )
+    }
+    it { is_expected.to contain_file('env_script_my-repo_test_storage').with_owner('me') }
+    it { is_expected.to contain_file('env_script_my-repo_test_storage').with_group('me') }
+    it { is_expected.to contain_file('env_script_my-repo_test_storage').with_mode('0600') }
+
+    it {
+      is_expected.to contain_exec('add_my-repo_test_storage').with_onlyif(
+        [
+          'test -f /my/super/safe/data/.duplicacy/preferences',
+          'test 0 -eq $(sed -e \'s/"//g\' /my/super/safe/data/duplicacy/preferences | awk \'/name/ {print $2}\' | grep test_storage | wc -l)',
+        ],
+      )
+    }
 
     # Validate the environment
     it {
-      is_expected.to contain_exec('init_my-repo_test_storage').with_environment(
+      is_expected.to contain_exec('add_my-repo_test_storage').with_environment(
         [
           'DUPLICACY_test_storage_B2_ID=my-id',
           'DUPLICACY_test_storage_B2_KEY=my-app-key',
@@ -140,7 +174,6 @@ describe 'duplicacy::storage' do
     }
   end
 
-
   # Valid configuration with defaults where possible
   context 'valid using default values' do
     let(:title) { 'my-repo_default' }
@@ -148,8 +181,9 @@ describe 'duplicacy::storage' do
       {
         'storage_name' => 'default',
         'repo_id' => 'my-repo',
-        'path'    => '/my/super/safe/data',
-        'target'  => {
+        'path' => '/my/super/safe/data',
+        'user' => 'me',
+        'target' => {
           'url' => 'b2://test-storage',
           'b2_id' => 'this-is-my-accound-id',
           'b2_app_key' => 'this-is-my-key',
@@ -161,17 +195,33 @@ describe 'duplicacy::storage' do
     end
 
     # Ensure it compiles
-    it { is_expected.to compile }
+    it { is_expected.to compile.with_all_deps }
 
     # Validate the command
-    it { is_expected.to contain_exec('init_my-repo_default').with_command(%r{duplicacy init -e default b2://test-storage}) }
+    it { is_expected.to contain_exec('init_my-repo').with_command(%r{duplicacy init -e my-repo b2://test-storage}) }
+    it { is_expected.to contain_exec('init_my-repo').with_cwd('/my/super/safe/data') }
 
-    # Validate the working directory
-    it { is_expected.to contain_exec('init_my-repo_default').with_cwd('/my/super/safe/data') }
+    # There should be a file
+    it { is_expected.to have_file_resource_count(1) }
+    it { is_expected.to contain_file('env_script_my-repo_default').with_ensure('file') }
+    it { is_expected.to contain_file('env_script_my-repo_default').with_path('/my/super/safe/data/.duplicacy/scripts/default.env') }
+    it {
+      is_expected.to contain_file('env_script_my-repo_default').with_content(
+        [
+          '#!/bin/sh
+# Export B2 Parameters
+export DUPLICACY_B2_ID="this-is-my-accound-id"
+export DUPLICACY_B2_KEY="this-is-my-key"
+# Export Encryption Password
+export DUPLICACY_PASSWORD="secret-sauce"
+',
+        ],
+      )
+    }
 
     # Validate the environment
     it {
-      is_expected.to contain_exec('init_my-repo_default').with_environment(
+      is_expected.to contain_exec('init_my-repo').with_environment(
         [
           'DUPLICACY_PASSWORD=secret-sauce',
           'DUPLICACY_B2_ID=this-is-my-accound-id',
@@ -188,8 +238,9 @@ describe 'duplicacy::storage' do
       {
         'storage_name' => 'default',
         'repo_id' => 'my-repo',
-        'path'    => '/my/super/safe/data',
-        'target'  => {
+        'path' => '/my/super/safe/data',
+        'user' => 'me',
+        'target' => {
           'url' => 'b2://test-storage',
           'b2_id' => 'this-is-my-accound-id',
           'b2_app_key' => 'this-is-my-key',
@@ -207,17 +258,16 @@ describe 'duplicacy::storage' do
     end
 
     # Ensure it compiles
-    it { is_expected.to compile }
+    it { is_expected.to compile.with_all_deps }
 
     # Validate the command
-    it { is_expected.to contain_exec('init_my-repo_default').with_command(%r{duplicacy init -e -iterations 32768 -c 4194304 -max 16777216 -min 1048576 default b2://test-storage}) }
-
-    # Validate the working directory
-    it { is_expected.to contain_exec('init_my-repo_default').with_cwd('/my/super/safe/data') }
+    it { is_expected.to contain_exec('init_my-repo').with_command(%r{duplicacy init -e -iterations 32768 -c 4194304 -max 16777216 -min 1048576 my-repo b2://test-storage}) }
+    it { is_expected.to contain_exec('init_my-repo').with_cwd('/my/super/safe/data') }
+    it { is_expected.to contain_exec('init_my-repo').with_path('/usr/local/bin:/usr/bin:/bin') }
 
     # Validate the environment
     it {
-      is_expected.to contain_exec('init_my-repo_default').with_environment(
+      is_expected.to contain_exec('init_my-repo').with_environment(
         [
           'DUPLICACY_PASSWORD=secret-sauce',
           'DUPLICACY_B2_ID=this-is-my-accound-id',
@@ -234,8 +284,9 @@ describe 'duplicacy::storage' do
       {
         'storage_name' => 'default',
         'repo_id' => 'my-repo',
-        'path'    => '/my/super/safe/data',
-        'target'  => {
+        'path' => '/my/super/safe/data',
+        'user' => 'me',
+        'target' => {
           'url' => 'b2://test-storage',
           'b2_id' => 'this-is-my-accound-id',
           'b2_app_key' => 'this-is-my-key',
@@ -250,17 +301,16 @@ describe 'duplicacy::storage' do
     end
 
     # Ensure it compiles
-    it { is_expected.to compile }
+    it { is_expected.to compile.with_all_deps }
 
     # Validate the command
-    it { is_expected.to contain_exec('init_my-repo_default').with_command(%r{duplicacy init -e -c 8388608 -max 33554432 -min 2097152 default b2://test-storage}) }
-
-    # Validate the working directory
-    it { is_expected.to contain_exec('init_my-repo_default').with_cwd('/my/super/safe/data') }
+    it { is_expected.to contain_exec('init_my-repo').with_command(%r{duplicacy init -e -c 8388608 -max 33554432 -min 2097152 my-repo b2://test-storage}) }
+    it { is_expected.to contain_exec('init_my-repo').with_cwd('/my/super/safe/data') }
+    it { is_expected.to contain_exec('init_my-repo').with_path('/usr/local/bin:/usr/bin:/bin') }
 
     # Validate the environment
     it {
-      is_expected.to contain_exec('init_my-repo_default').with_environment(
+      is_expected.to contain_exec('init_my-repo').with_environment(
         [
           'DUPLICACY_PASSWORD=secret-sauce',
           'DUPLICACY_B2_ID=this-is-my-accound-id',

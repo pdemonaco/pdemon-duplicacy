@@ -1,0 +1,23 @@
+<%- |  String $storage_name = undef,
+       String $b2_id,
+       String $b2_app_key,
+       Optional[String] $password = undef
+| -%>
+#!/bin/sh
+# Export B2 Parameters
+<% if $storage_name == 'default' { -%>
+export DUPLICACY_B2_ID="<%= $b2_id %>"
+export DUPLICACY_B2_KEY="<%= $b2_app_key %>"
+<% } else { -%>
+export DUPLICACY_<%= $storage_name %>_B2_ID="<%= $b2_id %>"
+export DUPLICACY_<%= $storage_name %>_B2_KEY="<%= $b2_app_key %>"
+<% } -%>
+<%# Potentially export password if it's present -%>
+<% if $password { -%>
+# Export Encryption Password
+<% if $storage_name == 'default' { -%>
+export DUPLICACY_PASSWORD="<%= $password %>"
+<% } else { -%>
+export DUPLICACY_<%= $storage_name %>_PASSWORD="<%= $password %>"
+<% } -%>
+<% } -%>
