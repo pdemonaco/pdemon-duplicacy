@@ -52,19 +52,35 @@ define duplicacy::repository (
     fail('A storage target named \'default\' must be defined!')
   }
 
-  # Create the duplicacy and scripts directories
+  # Create the duplicacy and puppet directories
   file { $pref_dir:
     ensure => directory,
     mode   => '0700',
     owner  => $user,
     group  => $user,
   }
-  file { "${pref_dir}/scripts":
+  file { "${pref_dir}/puppet":
     ensure  => directory,
     mode    => '0700',
     owner   => $user,
     group   => $user,
     require => File[$pref_dir],
+  }
+
+  # Create Subdirectories
+  file { default:
+    ensure  => directory,
+    mode    => '0700',
+    owner   => $user,
+    group   => $user,
+    require => File["${pref_dir}/puppet"],
+    ;
+    "${pref_dir}/puppet/logs":
+    ;
+    "${pref_dir}/puppet/locks":
+    ;
+    "${pref_dir}/puppet/scripts":
+    ;
   }
 
   # Initialize the default storage
@@ -74,7 +90,7 @@ define duplicacy::repository (
     repo_id      => $repo_id,
     path         => $path,
     user         => $user,
-    require      => File["${pref_dir}/scripts"],
+    require      => File["${pref_dir}/puppet"],
     *            => $default_params,
   }
 
@@ -88,7 +104,7 @@ define duplicacy::repository (
         user         => $user,
         require      => [
           Duplicacy::Storage["${repo_id}_default"],
-          File["${pref_dir}/scripts"],
+          File["${pref_dir}/puppet"],
         ],
         *            => $params
       }
@@ -106,8 +122,6 @@ define duplicacy::repository (
       ],
     }
   }
-
-  # Create script(s) for backups and prune execution?
 
   # TODO - Schedule Backups
 

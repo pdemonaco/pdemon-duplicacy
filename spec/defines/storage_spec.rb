@@ -137,10 +137,10 @@ describe 'duplicacy::storage' do
 
     # There should be a file
     it { is_expected.to have_file_resource_count(1) }
-    it { is_expected.to contain_file('env_script_my-repo_test_storage').with_ensure('file') }
-    it { is_expected.to contain_file('env_script_my-repo_test_storage').with_path('/my/super/safe/data/.duplicacy/scripts/test_storage.env') }
+    it { is_expected.to contain_file('env_my-repo_test_storage').with_ensure('file') }
+    it { is_expected.to contain_file('env_my-repo_test_storage').with_path('/my/super/safe/data/.duplicacy/puppet/scripts/test_storage.env') }
     it {
-      is_expected.to contain_file('env_script_my-repo_test_storage').with_content(
+      is_expected.to contain_file('env_my-repo_test_storage').with_content(
         [
           '#!/bin/sh
 # Export B2 Parameters
@@ -150,9 +150,9 @@ export DUPLICACY_TEST_STORAGE_B2_KEY="my-app-key"
         ],
       )
     }
-    it { is_expected.to contain_file('env_script_my-repo_test_storage').with_owner('me') }
-    it { is_expected.to contain_file('env_script_my-repo_test_storage').with_group('me') }
-    it { is_expected.to contain_file('env_script_my-repo_test_storage').with_mode('0600') }
+    it { is_expected.to contain_file('env_my-repo_test_storage').with_owner('me') }
+    it { is_expected.to contain_file('env_my-repo_test_storage').with_group('me') }
+    it { is_expected.to contain_file('env_my-repo_test_storage').with_mode('0600') }
 
     it {
       is_expected.to contain_exec('add_my-repo_test_storage').with_onlyif(
@@ -203,10 +203,10 @@ export DUPLICACY_TEST_STORAGE_B2_KEY="my-app-key"
 
     # There should be a file
     it { is_expected.to have_file_resource_count(1) }
-    it { is_expected.to contain_file('env_script_my-repo_default').with_ensure('file') }
-    it { is_expected.to contain_file('env_script_my-repo_default').with_path('/my/super/safe/data/.duplicacy/scripts/default.env') }
+    it { is_expected.to contain_file('env_my-repo_default').with_ensure('file') }
+    it { is_expected.to contain_file('env_my-repo_default').with_path('/my/super/safe/data/.duplicacy/puppet/scripts/default.env') }
     it {
-      is_expected.to contain_file('env_script_my-repo_default').with_content(
+      is_expected.to contain_file('env_my-repo_default').with_content(
         [
           '#!/bin/sh
 # Export B2 Parameters

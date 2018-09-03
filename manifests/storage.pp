@@ -171,9 +171,9 @@ define duplicacy::storage (
   }
 
   # Create the environment file
-  file { "env_script_${repo_id}_${storage_name}":
+  file { "env_${repo_id}_${storage_name}":
     ensure  => file,
-    path    => "${path}/.duplicacy/scripts/${storage_name}.env",
+    path    => "${path}/.duplicacy/puppet/scripts/${storage_name}.env",
     content => epp($file_template, $file_argument),
     owner   => $user,
     group   => $user,

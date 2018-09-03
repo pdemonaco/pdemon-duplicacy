@@ -86,26 +86,31 @@ describe 'duplicacy::repository' do
 
     it { is_expected.to compile.with_all_deps }
 
-    # There should be four files: 2 directories created here, a file in the
+    # There should be 7 files: 5 directories created here, a file in the
     # storage, and a file in the filters
-    it { is_expected.to have_file_resource_count(4) }
+    it { is_expected.to have_file_resource_count(7) }
 
     # One directory should be the duplicacy folder
     it { is_expected.to contain_file('/my/backup/dir/.duplicacy').with_ensure('directory') }
     it { is_expected.to contain_file('/my/backup/dir/.duplicacy').with_mode('0700') }
     it { is_expected.to contain_file('/my/backup/dir/.duplicacy').with_owner('root').with_group('root') }
 
-    # One directory should be the scripts folder
-    it { is_expected.to contain_file('/my/backup/dir/.duplicacy/scripts').with_ensure('directory') }
-    it { is_expected.to contain_file('/my/backup/dir/.duplicacy/scripts').with_mode('0700') }
-    it { is_expected.to contain_file('/my/backup/dir/.duplicacy/scripts').with_owner('root').with_group('root') }
-    it { is_expected.to contain_file('/my/backup/dir/.duplicacy/scripts').that_requires('File[/my/backup/dir/.duplicacy]') }
+    # One directory should be the puppet folder
+    it { is_expected.to contain_file('/my/backup/dir/.duplicacy/puppet').with_ensure('directory') }
+    it { is_expected.to contain_file('/my/backup/dir/.duplicacy/puppet').with_mode('0700') }
+    it { is_expected.to contain_file('/my/backup/dir/.duplicacy/puppet').with_owner('root').with_group('root') }
+    it { is_expected.to contain_file('/my/backup/dir/.duplicacy/puppet').that_requires('File[/my/backup/dir/.duplicacy]') }
+    
+    # There should also be three subfolders of puppet: scripts, logs, locks
+    it { is_expected.to contain_file('/my/backup/dir/.duplicacy/puppet/scripts').that_requires('File[/my/backup/dir/.duplicacy/puppet]') }
+    it { is_expected.to contain_file('/my/backup/dir/.duplicacy/puppet/logs').that_requires('File[/my/backup/dir/.duplicacy/puppet]') }
+    it { is_expected.to contain_file('/my/backup/dir/.duplicacy/puppet/locks').that_requires('File[/my/backup/dir/.duplicacy/puppet]') }
 
     # One storage repo
     it { is_expected.to have_duplicacy__storage_resource_count(1) }
     it { is_expected.to contain_duplicacy__storage('my-repo_default').with_storage_name('default') }
     it { is_expected.to contain_duplicacy__storage('my-repo_default').with_path('/my/backup/dir') }
-    it { is_expected.to contain_duplicacy__storage('my-repo_default').that_requires('File[/my/backup/dir/.duplicacy/scripts]') }
+    it { is_expected.to contain_duplicacy__storage('my-repo_default').that_requires('File[/my/backup/dir/.duplicacy/puppet]') }
 
     # Some filters
     it { is_expected.to have_duplicacy__filter_resource_count(1) }
