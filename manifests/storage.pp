@@ -157,7 +157,7 @@ define duplicacy::storage (
         "${env_prefix}_B2_KEY=${b2_app_key}"
       ]
       $cmd_args = " ${repo_id} ${storage_url}"
-      $file_template = 'duplicacy/b2_env.sh.epp'
+      $file_template = 'duplicacy/b2.env.epp'
       $file_argument = {
         'storage_name' => upcase($storage_name),
         'password'     => $password,
