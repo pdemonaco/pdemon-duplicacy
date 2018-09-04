@@ -1,0 +1,101 @@
+<%- |   String $storage_name,
+  String $backup_name,
+  String $repo_dir,
+  String $pref_dir,
+  Integer $threads,
+  Boolean $hash_mode,
+  Optional[Integer] $limit_rate = undef,
+  Optional[String] $backup_tag = undef,
+  Optional[String] $email_recipient = undef,
+| -%>
+#!/bin/sh
+#==== Constants
+PATH="/usr/local/bin:/usr/bin:/bin"
+STORAGE_NAME="<%= $storage_name %>"
+BACKUP_NAME="<%= $backup_name %>"
+TIMESTAMP=$(date +%Y-%m-%d_%H%M%S)
+
+# Paths
+REPO_DIR="<%= $repo_dir %>"
+PUPPET_DIR="<%= $pref_dir %>/puppet"
+LOCK_DIR="${PUPPET_DIR}/locks"
+LOG_DIR="${PUPPET_DIR}/logs"
+SCRIPT_DIR="${PUPPET_DIR}/scripts"
+
+# Config files
+LOCK_FILE="${LOCK_DIR}/<%= $storage_name %>.lock"
+ENV_CONFIG="${SCRIPT_DIR}/${STORAGE_NAME}.env"
+LOG_FILE="${LOG_DIR}/${BACKUP_NAME}_${STORAGE_NAME}_${TIMESTAMP}.log"
+
+#==== Check for locks and aquire
+acquire_backup_lock()
+{
+  # Abort if locked!
+  if [ -e "${LOCK_FILE}" ]
+  then
+    echo "${STORAGE_NAME} is locked!" >&2
+    exit 1
+  # Otherwise capture backup name & PID
+  else
+    echo "${BACKUP_NAME}: $$" > "${LOCK_FILE}"
+  fi
+}
+
+#==== Main Routine
+
+# Acquire the storage lock for this repo or abort
+acquire_backup_lock
+
+# Retrieve our credentials
+source "${PUPPET_DIR}/${ENV_CONFIG}"
+
+# Move to the root of the repository
+cd "${REPO_DIR}"
+
+# Execute the backup
+duplicacy -log -background backup \
+<% if $hash_mode { -%>  -hash \<% } -%>
+<% if $limit_rate { -%>  -limit-rate <%= $limit_rate %> \<% } -%>
+<% if $storage_name != 'default' { -%>  -storage <%= $storage_name %> \<% } -%>
+<% if $backup_tag { -%>  -t <%= $backup_tag %> \<% } -%>
+  -threads <%= $threads %> >"${LOG_FILE}" 2>&1
+<% if $email_recipient { -%>
+
+# Notify someone about what happened
+RC="$?"
+MESSAGE=""
+case "${RC}" in
+  0)
+    STATUS="Success"
+    MESSAGE="See attached log"
+    ;;
+  1)
+    STATUS="Failure"
+    MESSAGE="Interrupted by user. See attached log."
+    ;;
+  2)
+    STATUS="Failure"
+    MESSAGE="Malformed arguments. See attached log."
+    ;;
+  3)
+    STATUS="Failure"
+    MESSAGE="Invalid argument value. See attached log."
+    ;;
+  100)
+    STATUS="Failure"
+    MESSAGE="Runtime error in Duplicacy code. See attached log."
+    ;;
+  101)
+    STATUS="Failure"
+    MESSAGE="Runtime error in an external dependency. See attached log."
+    ;;
+  *)
+    STATUS="Unknown"
+    MESSAGE="Return code - ${RC}. See attached log."
+    ;;
+esac
+echo "${MESSAGE}" | mutt -s "Duplicacy Backup ${BACKUP_NAME} - ${STATUS}" <%= $email_recipient %> -a "${LOG_FILE}"
+<% } -%>
+
+# Release the lock
+rm "${LOCK_FILE}"
