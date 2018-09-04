@@ -3,10 +3,10 @@ require 'spec_helper'
 describe 'duplicacy::storage' do
   # Test malformed encryption stanza
   context 'encryption set without password' do
-    let(:title) { 'test_storage' }
+    let(:title) { 'other_bucket' }
     let(:params) do
       {
-        'storage_name' => 'test_storage',
+        'storage_name' => 'other_bucket',
         'repo_id' => 'test_repo',
         'path' => '/my/super/safe/data',
         'user' => 'me',
@@ -26,10 +26,10 @@ describe 'duplicacy::storage' do
 
   # Test target not specified
   context 'missing target' do
-    let(:title) { 'test_storage' }
+    let(:title) { 'other_bucket' }
     let(:params) do
       {
-        'storage_name' => 'test_storage',
+        'storage_name' => 'other_bucket',
         'repo_id' => 'test_repo',
         'path'    => '/my/super/safe/data',
         'user' => 'me',
@@ -41,10 +41,10 @@ describe 'duplicacy::storage' do
 
   # Test target url not specified
   context 'missing url' do
-    let(:title) { 'test_storage' }
+    let(:title) { 'other_bucket' }
     let(:params) do
       {
-        'storage_name' => 'test_storage',
+        'storage_name' => 'other_bucket',
         'repo_id' => 'test_repo',
         'path'    => '/my/super/safe/data',
         'user' => 'me',
@@ -59,10 +59,10 @@ describe 'duplicacy::storage' do
 
   # Test unsupported backend
   context 'unsupported backend' do
-    let(:title) { 'test_storage' }
+    let(:title) { 'other_bucket' }
     let(:params) do
       {
-        'storage_name' => 'test_storage',
+        'storage_name' => 'other_bucket',
         'repo_id' => 'test_repo',
         'path'    => '/my/super/safe/data',
         'user' => 'me',
@@ -77,10 +77,10 @@ describe 'duplicacy::storage' do
 
   # Test missing b2 data
   context 'b2 missing account_id' do
-    let(:title) { 'test_storage' }
+    let(:title) { 'other_bucket' }
     let(:params) do
       {
-        'storage_name' => 'test_storage',
+        'storage_name' => 'other_bucket',
         'repo_id' => 'test_repo',
         'path'    => '/my/super/safe/data',
         'user' => 'me',
@@ -95,10 +95,10 @@ describe 'duplicacy::storage' do
   end
 
   context 'b2 missing application_key' do
-    let(:title) { 'test_storage' }
+    let(:title) { 'other_bucket' }
     let(:params) do
       {
-        'storage_name' => 'test_storage',
+        'storage_name' => 'other_bucket',
         'repo_id' => 'test_repo',
         'path'    => '/my/super/safe/data',
         'user' => 'me',
@@ -113,10 +113,10 @@ describe 'duplicacy::storage' do
   end
 
   context 'b2 alt storage without encryption' do
-    let(:title) { 'test_storage' }
+    let(:title) { 'other_bucket' }
     let(:params) do
       {
-        'storage_name' => 'test_storage',
+        'storage_name' => 'other_bucket',
         'repo_id' => 'my-repo',
         'path'    => '/my/super/safe/data',
         'user' => 'me',
@@ -131,44 +131,52 @@ describe 'duplicacy::storage' do
     it { is_expected.to compile.with_all_deps }
 
     # Validate the command
-    it { is_expected.to contain_exec('add_my-repo_test_storage').with_command(%r{duplicacy add test_storage my-repo b2://no-params}) }
-    it { is_expected.to contain_exec('add_my-repo_test_storage').with_cwd('/my/super/safe/data') }
-    it { is_expected.to contain_exec('add_my-repo_test_storage').with_path('/usr/local/bin:/usr/bin:/bin') }
+    it {
+      is_expected.to contain_exec('add_my-repo_other_bucket').with(
+        'command' => %r{duplicacy add other_bucket my-repo b2://no-params},
+        'cwd' => '/my/super/safe/data',
+        'path' => '/usr/local/bin:/usr/bin:/bin',
+      )
+    }
 
     # There should be a file
     it { is_expected.to have_file_resource_count(1) }
-    it { is_expected.to contain_file('env_my-repo_test_storage').with_ensure('file') }
-    it { is_expected.to contain_file('env_my-repo_test_storage').with_path('/my/super/safe/data/.duplicacy/puppet/scripts/test_storage.env') }
     it {
-      is_expected.to contain_file('env_my-repo_test_storage').with_content(
+      is_expected.to contain_file('env_my-repo_other_bucket').with(
+        'ensure' => 'file',
+        'path' => '/my/super/safe/data/.duplicacy/puppet/scripts/other_bucket.env',
+      )
+    }
+    it {
+      is_expected.to contain_file('env_my-repo_other_bucket').with_content(
         [
           '#!/bin/sh
 # Export B2 Parameters
-export DUPLICACY_TEST_STORAGE_B2_ID="my-id"
-export DUPLICACY_TEST_STORAGE_B2_KEY="my-app-key"
+export DUPLICACY_OTHER_BUCKET_B2_ID="my-id"
+export DUPLICACY_OTHER_BUCKET_B2_KEY="my-app-key"
 ',
         ],
       )
     }
-    it { is_expected.to contain_file('env_my-repo_test_storage').with_owner('me') }
-    it { is_expected.to contain_file('env_my-repo_test_storage').with_group('me') }
-    it { is_expected.to contain_file('env_my-repo_test_storage').with_mode('0600') }
+    it { is_expected.to contain_file('env_my-repo_other_bucket').with_owner('me') }
+    it { is_expected.to contain_file('env_my-repo_other_bucket').with_group('me') }
+    it { is_expected.to contain_file('env_my-repo_other_bucket').with_mode('0600') }
 
     it {
-      is_expected.to contain_exec('add_my-repo_test_storage').with_onlyif(
+      is_expected.to contain_exec('add_my-repo_other_bucket').with_onlyif(
         [
           'test -f /my/super/safe/data/.duplicacy/preferences',
-          'test 0 -eq $(sed -e \'s/"//g\' /my/super/safe/data/duplicacy/preferences | awk \'/name/ {print $2}\' | grep test_storage | wc -l)',
+          'test 0 -eq $(sed -e \'s/"//g\' /my/super/safe/data/duplicacy/preferences | awk \'/name/ {print $2}\' | grep other_bucket | wc -l)',
         ],
       )
     }
 
     # Validate the environment
     it {
-      is_expected.to contain_exec('add_my-repo_test_storage').with_environment(
+      is_expected.to contain_exec('add_my-repo_other_bucket').with_environment(
         [
-          'DUPLICACY_test_storage_B2_ID=my-id',
-          'DUPLICACY_test_storage_B2_KEY=my-app-key',
+          'DUPLICACY_OTHER_BUCKET_B2_ID=my-id',
+          'DUPLICACY_OTHER_BUCKET_B2_KEY=my-app-key',
         ],
       )
     }

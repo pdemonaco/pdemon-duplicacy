@@ -75,7 +75,8 @@ define duplicacy::storage (
   if ($storage_name == 'default') {
     $env_prefix = 'DUPLICACY'
   } else {
-    $env_prefix = "DUPLICACY_${storage_name}"
+    $upper_case_storage_name = upcase($storage_name)
+    $env_prefix = "DUPLICACY_${upper_case_storage_name}"
   }
 
   # Process encryption parameters
