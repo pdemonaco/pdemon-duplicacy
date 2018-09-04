@@ -100,7 +100,7 @@ describe 'duplicacy::repository' do
     it { is_expected.to contain_file('/my/backup/dir/.duplicacy/puppet').with_mode('0700') }
     it { is_expected.to contain_file('/my/backup/dir/.duplicacy/puppet').with_owner('root').with_group('root') }
     it { is_expected.to contain_file('/my/backup/dir/.duplicacy/puppet').that_requires('File[/my/backup/dir/.duplicacy]') }
-    
+
     # There should also be three subfolders of puppet: scripts, logs, locks
     it { is_expected.to contain_file('/my/backup/dir/.duplicacy/puppet/scripts').that_requires('File[/my/backup/dir/.duplicacy/puppet]') }
     it { is_expected.to contain_file('/my/backup/dir/.duplicacy/puppet/logs').that_requires('File[/my/backup/dir/.duplicacy/puppet]') }
@@ -150,14 +150,25 @@ describe 'duplicacy::repository' do
 
     it { is_expected.to compile.with_all_deps }
 
-    # One storage repo
+    # Default storage repo
     it { is_expected.to have_duplicacy__storage_resource_count(2) }
-    it { is_expected.to contain_duplicacy__storage('my-repo_default').with_storage_name('default') }
-    it { is_expected.to contain_duplicacy__storage('my-repo_default').with_path('/my/backup/dir') }
-    it { is_expected.to contain_duplicacy__storage('my-repo_other_bucket').with_storage_name('other_bucket') }
+    it {
+      is_expected.to contain_duplicacy__storage('my-repo_default').with(
+        'storage_name' => 'default',
+        'path' => '/my/backup/dir',
+      )
+    }
 
-    # The second storage sholud depend on default we need to initialize before
-    # we can add
+    # Other repo
+    it {
+      is_expected.to contain_duplicacy__storage('my-repo_other_bucket').with(
+        'storage_name' => 'other_bucket',
+        'path' => '/my/backup/dir',
+      )
+    }
+
+    # The second storage sholud depend on default.
+    # We need to initialize before we can add additional storage
     it { is_expected.to contain_duplicacy__storage('my-repo_other_bucket').that_requires('Duplicacy::Storage[my-repo_default]') }
 
     # Some filters
