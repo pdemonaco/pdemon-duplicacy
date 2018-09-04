@@ -6,7 +6,7 @@ describe 'duplicacy::filter' do
     let(:title) { 'my-repo_filters' }
     let(:params) do
       {
-        'pref_dir' => '/my/repo/dir/',
+        'pref_dir' => '/my/backup/dir/.duplicacy/',
         'user' => 'me',
       }
     end
@@ -20,7 +20,7 @@ describe 'duplicacy::filter' do
     let(:title) { 'my-repo_filters' }
     let(:params) do
       {
-        'pref_dir' => '/my/repo/dir',
+        'pref_dir' => '/my/backup/dir/.duplicacy',
         'user' => 'me',
         'rules' => [
           '+foo/bar/*',
@@ -30,14 +30,14 @@ describe 'duplicacy::filter' do
     end
 
     # Filter file should be created
-    it { is_expected.to contain_file('/my/repo/dir/filters').with_ensure('file').with_owner('me').with_group('me').with_mode('0644') }
+    it { is_expected.to contain_file('/my/backup/dir/.duplicacy/filters').with_ensure('file').with_owner('me').with_group('me').with_mode('0644') }
 
     # There should be two rules
     it { is_expected.to have_file_line_resource_count(2) }
 
-    # Rule lines should exist which depend on the file
-    it { is_expected.to contain_file_line('rule_0').that_requires('File[/my/repo/dir/filters]') }
-    it { is_expected.to contain_file_line('rule_1').that_requires(['File[/my/repo/dir/filters]', 'File_line[rule_0]']) }
+    # Rule lines should exist which depend on the file and the previous rule
+    it { is_expected.to contain_file_line('rule_0').that_requires('File[/my/backup/dir/.duplicacy/filters]') }
+    it { is_expected.to contain_file_line('rule_1').that_requires(['File[/my/backup/dir/.duplicacy/filters]', 'File_line[rule_0]']) }
   end
 
   # This doesn't do anything at the moment
