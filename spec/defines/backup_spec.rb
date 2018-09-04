@@ -40,12 +40,22 @@ describe 'duplicacy::backup' do
         'pref_dir' => '/backup/dir/.duplicacy',
         'user' => 'root',
         'cron_entry' => {
-          'hour' => '*/6',
-        }
+          'hour' => '0',
+        },
       }
     end
 
     it { is_expected.to compile.with_all_deps }
+
+    # Check the cron entry
+    it {
+      is_expected.to contain_cron('backup-cron_my-repo_daily').with(
+        'ensure' => 'present',
+        'command' => '/backup/dir/.duplicacy/puppet/scripts/backup_my-repo_daily.sh',
+        'user' => 'root',
+        'hour' => '0',
+      ).that_requires('File[backup-script_my-repo_daily]')
+    }
 
     # Check the basic parameters of the file
     it {
@@ -128,7 +138,7 @@ rm "${LOCK_FILE}"
         'email_recipient' => 'user@example.com',
         'cron_entry' => {
           'hour' => '*/6',
-        }
+        },
       }
     end
 
@@ -182,6 +192,108 @@ case "[$]{RC}" in
     ;;
 esac
 echo "[$]{MESSAGE}" [|] mutt -s "Duplicacy Backup [$]{BACKUP_NAME} - [$]{STATUS}" user@example[.]com -a "[$]{LOG_FILE}"$!m,
+      )
+    }
+  end
+
+  context 'Check hash option' do
+    let(:params) do
+      {
+        'storage_name' => 'default',
+        'repo_dir' => '/backup/dir',
+        'pref_dir' => '/backup/dir/.duplicacy',
+        'user' => 'root',
+        'cron_entry' => {
+          'hour' => '0',
+        },
+        'threads' => 8,
+        'hash_mode' => true,
+      }
+    end
+
+    it { is_expected.to compile.with_all_deps }
+
+    # Validate the backup command
+    it {
+      is_expected.to contain_file('backup-script_my-repo_daily').with_content(
+        %r!duplicacy -log -background backup \\\n  -hash \\\n  -threads 8 >"[$]{LOG_FILE}" 2>&1!m,
+      )
+    }
+  end
+
+  context 'Check limit rate option' do
+    let(:params) do
+      {
+        'storage_name' => 'default',
+        'repo_dir' => '/backup/dir',
+        'pref_dir' => '/backup/dir/.duplicacy',
+        'user' => 'root',
+        'cron_entry' => {
+          'hour' => '0',
+        },
+        'threads' => 6,
+        'limit_rate' => 512,
+      }
+    end
+
+    it { is_expected.to compile.with_all_deps }
+
+    # Validate the backup command
+    it {
+      is_expected.to contain_file('backup-script_my-repo_daily').with_content(
+        %r!duplicacy -log -background backup \\\n  -limit-rate 512 \\\n  -threads 6 >"[$]{LOG_FILE}" 2>&1!m,
+      )
+    }
+  end
+
+  context 'Check tag option' do
+    let(:params) do
+      {
+        'storage_name' => 'default',
+        'repo_dir' => '/backup/dir',
+        'pref_dir' => '/backup/dir/.duplicacy',
+        'user' => 'root',
+        'cron_entry' => {
+          'hour' => '0',
+        },
+        'threads' => 4,
+        'backup_tag' => 'daily-0000',
+      }
+    end
+
+    it { is_expected.to compile.with_all_deps }
+
+    # Validate the backup command
+    it {
+      is_expected.to contain_file('backup-script_my-repo_daily').with_content(
+        %r!duplicacy -log -background backup \\\n  -t daily-0000 \\\n  -threads 4 >"[$]{LOG_FILE}" 2>&1!m,
+      )
+    }
+  end
+
+  context 'Check alternate storage name w/ all options' do
+    let(:params) do
+      {
+        'storage_name' => 'other_bucket',
+        'repo_dir' => '/my/super/safe/data',
+        'pref_dir' => '/my/super/safe/data/.duplicacy',
+        'user' => 'root',
+        'cron_entry' => {
+          'hour' => '0',
+        },
+        'hash_mode' => true,
+        'limit_rate' => 1024,
+        'threads' => 4,
+        'backup_tag' => 'daily-0000',
+      }
+    end
+
+    it { is_expected.to compile.with_all_deps }
+
+    # Validate the backup command
+    it {
+      is_expected.to contain_file('backup-script_my-repo_daily').with_content(
+        %r!duplicacy -log -background backup \\\n  -hash \\\n  -limit-rate 1024 \\\n  -storage other_bucket \\\n  -t daily-0000 \\\n  -threads 4 >"[$]{LOG_FILE}" 2>&1!m,
       )
     }
   end

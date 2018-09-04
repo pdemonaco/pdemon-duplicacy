@@ -54,10 +54,18 @@ cd "${REPO_DIR}"
 
 # Execute the backup
 duplicacy -log -background backup \
-<% if $hash_mode { -%>  -hash \<% } -%>
-<% if $limit_rate { -%>  -limit-rate <%= $limit_rate %> \<% } -%>
-<% if $storage_name != 'default' { -%>  -storage <%= $storage_name %> \<% } -%>
-<% if $backup_tag { -%>  -t <%= $backup_tag %> \<% } -%>
+<% if $hash_mode { -%>
+  -hash \
+<% } -%>
+<% if $limit_rate { -%>
+  -limit-rate <%= $limit_rate %> \
+<% } -%>
+<% if $storage_name != 'default' { -%>
+  -storage <%= $storage_name %> \
+<% } -%>
+<% if $backup_tag { -%>
+  -t <%= $backup_tag %> \
+<% } -%>
   -threads <%= $threads %> >"${LOG_FILE}" 2>&1
 <% if $email_recipient { -%>
 
