@@ -101,15 +101,26 @@ describe 'duplicacy::repository' do
     }
 
     # One directory should be the puppet folder
-    it { is_expected.to contain_file('/my/backup/dir/.duplicacy/puppet').with_ensure('directory') }
-    it { is_expected.to contain_file('/my/backup/dir/.duplicacy/puppet').with_mode('0700') }
-    it { is_expected.to contain_file('/my/backup/dir/.duplicacy/puppet').with_owner('root').with_group('root') }
-    it { is_expected.to contain_file('/my/backup/dir/.duplicacy/puppet').that_requires('File[/my/backup/dir/.duplicacy]') }
+    it {
+      is_expected.to contain_file('/my/backup/dir/.duplicacy/puppet').with(
+        'ensure' => 'directory',
+        'mode' => '0700',
+        'owner' => 'root',
+        'group' => 'root',
+      ).that_requires('File[/my/backup/dir/.duplicacy]')
+    }
 
     # There should also be three subfolders of puppet: scripts, logs, locks
     it { is_expected.to contain_file('/my/backup/dir/.duplicacy/puppet/scripts').that_requires('File[/my/backup/dir/.duplicacy/puppet]') }
     it { is_expected.to contain_file('/my/backup/dir/.duplicacy/puppet/logs').that_requires('File[/my/backup/dir/.duplicacy/puppet]') }
     it { is_expected.to contain_file('/my/backup/dir/.duplicacy/puppet/locks').that_requires('File[/my/backup/dir/.duplicacy/puppet]') }
+
+    # The log directory should be cleaned up at some frequency
+    it {
+      is_expected.to contain_tidy('/my/backup/dir/.duplicacy/puppet/logs').with(
+        'age' => '4w',
+      ).that_requires('File[/my/backup/dir/.duplicacy/puppet/logs]')
+    }
 
     # One storage repo
     it { is_expected.to have_duplicacy__storage_resource_count(1) }
@@ -180,5 +191,53 @@ describe 'duplicacy::repository' do
     it { is_expected.to have_duplicacy__filter_resource_count(1) }
     it { is_expected.to contain_duplicacy__filter('my-repo_filters').with_pref_dir('/my/backup/dir/.duplicacy') }
     it { is_expected.to contain_duplicacy__filter('my-repo_filters').that_requires('Duplicacy::Storage[my-repo_default]') }
+  end
+
+  # One valid storage with a backup schedule
+  context 'single valid storage with backups' do
+    let(:params) do
+      {
+        'repo_path' => '/my/backup/dir',
+        'storage_targets' => {
+          'default' => {
+            'target' => {
+              'url' => 'b2://my-bucket',
+              'b2_id' => 'my-id',
+              'b2_app_key' => 'my-key',
+            },
+            'encryption' => {
+              'password' => 'batman',
+            },
+          },
+        },
+        'filter_rules' => [
+          '+foo/baz/*',
+          '-*',
+        ],
+        'backup_schedules' => [
+          {
+            'storage_name' => 'default',
+            'cron_entry' => {
+              'hour' => '1',
+              'minute' => '30',
+            },
+            'threads' => 8,
+            'email_recipient' => 'me@example.com',
+          },
+        ],
+      }
+    end
+
+    it { is_expected.to compile.with_all_deps }
+
+    # Ensure that the schedule is created
+    it {
+      is_expected.to contain_duplicacy__backup('my-repo_default_backup_0').with(
+        'repo_path' => '/my/backup/dir',
+        'user' => 'root',
+        'threads' => 8,
+        'email_recipient' => 'me@example.com',
+      ).that_requires('Duplicacy::Storage[my-repo_default]')
+    }
   end
 end

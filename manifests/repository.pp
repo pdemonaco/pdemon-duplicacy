@@ -2,11 +2,11 @@
 #
 # @summary A short summary of the purpose of this defined type.
 #
-# @example
+# @example Fully configured repository
 #   duplicacy::repository { 'my-repo':
-#     repo_path       => '/path/to/the/directory',
-#     user            => 'me',
-#     storage_targets => {
+#     repo_path        => '/path/to/the/directory',
+#     user             => 'me',
+#     storage_targets  => {
 #       'default'    => {
 #         target       => {
 #           url        => 'b2://backups-and-stuff',
@@ -23,6 +23,20 @@
 #           min            => 2097152,
 #       },
 #     },
+#     backup_schedules => [
+#       {
+#         storage_name => default,
+#         cron_entry   => {
+#           hour       => '7',
+#           minute     => '0',
+#           weekday    => ['1', '2', '6']
+#         },
+#         threads         => 6,
+#         hash_mode       => true,
+#         email_recipient => 'batman@batcave.com',
+#       },
+#     ],
+#     log_retention    => '5d'
 #   }
 #
 # @param repo_id [String]
@@ -43,14 +57,29 @@
 #   subtype must be omitted here. Specifically, `repo_id`, `repo_path`, and 
 #   `user` as these are all overridden.
 #
+# @param backup_schedules Optional[Array[Hash[String, Variant[String, Integer, Hash[String, Variant[String, Integer]]]]]]
+#   A list of parameters and schedules for the execution of a series of backups
+#   of this repository. If no schedules are provided this machine will not
+#   backup this repository.
+#
+#   @note The following parameters must not be specified: `user`, `repo_path`
+#
 # @param filter_rules [Optional[Array[String]]]
 #   An ordered list of valid include/exclude filters for duplicacy.
+#
+# @param log_retention [Optional[String]]
+#   The amount of time to retain logs in the log directory. Note that this is
+#   simply the age parameter to a
+#   [tidy](https://puppet.com/docs/puppet/5.5/types/tidy.html#tidy-attribute-age)
+#   resource.
 define duplicacy::repository (
   String $repo_id = $name,
   String $repo_path = undef,
   String $user = 'root',
   Hash[String, Variant[String, Hash[String, Variant[String, Hash[String, Variant[String, Integer]]]]]] $storage_targets = {},
+  Optional[Array[Hash[String, Variant[String, Integer, Hash[String, Variant[String, Integer]]]]]] $backup_schedules = [],
   Optional[Array[String]] $filter_rules = [],
+  Optional[String] $log_retention = '4w',
 ) {
   # TODO - actually really support alternate pref_dirs
   $pref_dir = "${repo_path}/.duplicacy"
@@ -133,7 +162,24 @@ define duplicacy::repository (
     }
   }
 
-  # TODO - Schedule Backups
+  # Tidy any logs created by the jobs running on this system.
+  tidy { "${pref_dir}/puppet/logs":
+    require => File["${pref_dir}/puppet/logs"],
+    age     => $log_retention,
+  }
+
+  # Schedule Backups
+  unless(empty($backup_schedules)) {
+    $backup_schedules.each | $index, $schedule | {
+      $storage_name = $schedule['storage_name']
+      duplicacy::backup { "${repo_id}_${storage_name}_backup_${index}":
+        repo_path => $repo_path,
+        user      => $user,
+        *         => $schedule,
+        require   => Duplicacy::Storage["${repo_id}_${storage_name}"]
+      }
+    }
+  }
 
   # TODO - Schedule Prunes
 }
