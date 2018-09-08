@@ -4,27 +4,31 @@
 #
 # @example
 #   duplicacy::repository { 'my-repo':
-#     path => '/path/to/the/directory',
-#     user => 'me',
-#     storage_targets = {
-#       'default'         => {
-#         path            => '/mnt/backup/my/directory',
-#         target          => {
-#           url           => 'b2://backups-and-stuff',
-#           b2_id => 'my-id',
-#           b2_app_key    => 'my-key',
+#     repo_path       => '/path/to/the/directory',
+#     user            => 'me',
+#     storage_targets => {
+#       'default'    => {
+#         target       => {
+#           url        => 'b2://backups-and-stuff',
+#           b2_id      => 'my-id',
+#           b2_app_key => 'my-key',
 #         },
-#         encryption => {
-#           password => 'secret-sauce',
+#         encryption   => {
+#           password   => 'secret-sauce',
+#           iterations => 32768,
 #         },
+#         chunk_parameters => {
+#           size           => 8388608,
+#           max            => 33554432,
+#           min            => 2097152,
 #       },
 #     },
 #   }
 #
 # @param repo_id [String]
-#   The name of this particular repository. This is a namevar
+#   The name of this particular repository. This is a namevar.
 #
-# @param path [String]
+# @param repo_path [String]
 #   Absolute path to the directory to be backed up. Note that backup directories
 #   should not be nested. 
 #
@@ -32,18 +36,24 @@
 #   The name of the user who owns this repository for a given server. This user
 #   will also run the cron jobs for that system. Defaults to 'root'.
 # 
-# @param storage [Hash]
+# @param storage_targets [Hash[String, Variant[String, Hash[String, Variant[String, Hash[String, Variant[String, Integer]]]]]]]
 #   A hash of duplicacy::storage types against which this repo should be
-#   initialized. Note that there must be an entry named 'default'.
+#   initialized. Note that there must be an entry named 'default'. Note that
+#   several of the parameters which can be directly specified to the storage
+#   subtype must be omitted here. Specifically, `repo_id`, `repo_path`, and 
+#   `user` as these are all overridden.
+#
+# @param filter_rules [Optional[Array[String]]]
+#   An ordered list of valid include/exclude filters for duplicacy.
 define duplicacy::repository (
   String $repo_id = $name,
-  String $path = undef,
+  String $repo_path = undef,
   String $user = 'root',
   Hash[String, Variant[String, Hash[String, Variant[String, Hash[String, Variant[String, Integer]]]]]] $storage_targets = {},
   Optional[Array[String]] $filter_rules = [],
 ) {
   # TODO - actually really support alternate pref_dirs
-  $pref_dir = "${path}/.duplicacy"
+  $pref_dir = "${repo_path}/.duplicacy"
 
   # Ensure storage configuration is valid
   if empty($storage_targets) {
@@ -88,7 +98,7 @@ define duplicacy::repository (
   duplicacy::storage { "${repo_id}_default":
     storage_name => 'default',
     repo_id      => $repo_id,
-    path         => $path,
+    repo_path    => $repo_path,
     user         => $user,
     require      => File["${pref_dir}/puppet"],
     *            => $default_params,
@@ -100,7 +110,7 @@ define duplicacy::repository (
       duplicacy::storage { "${repo_id}_${target}":
         storage_name => $target,
         repo_id      => $repo_id,
-        path         => $path,
+        repo_path    => $repo_path,
         user         => $user,
         require      => [
           Duplicacy::Storage["${repo_id}_default"],

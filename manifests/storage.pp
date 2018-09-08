@@ -7,7 +7,7 @@
 #   duplicacy::storage { 'my-repo_default':
 #     storage_name         => 'default',
 #     repo_id              => 'my-repo',
-#     path                 => '/mnt/backup/my/directory',
+#     repo_path            => '/mnt/backup/my/directory',
 #     target               => {
 #       url                => 'b2://duplicacy-primary',
 #       b2_id      => 'my-account-id-here',
@@ -24,20 +24,20 @@
 #     },
 #   }
 #
-# @param $storage_name [String]
+# @param storage_name [String]
 #   Name of this particular storage backend as referenced by duplicacy for this
 #   specific repository. Note that the backend named 'default' is the primary.
 #
-# @param $repo_id [String]
+# @param repo_id [String]
 #   ID referencing this repository on the target storage backend. 
 #
-# @param $path [String]
+# @param repo_path [String]
 #   Directory in which this particular repository resides on this machine. 
 #
-# @param $user [String]
+# @param user [String]
 #   User to whom this repository belongs.
 #
-# @param encrption [Hash]
+# @param encryption [Optional[Hash[String, Variant[String, Integer]]]]
 #   This hash includes two key parameters related to encryption.
 #     * `password` - this is the password used to encrypt the config file
 #     * `iterations` - the number of iterations to generate the block password.
@@ -47,7 +47,7 @@
 #   See https://github.com/gilbertchen/duplicacy/wiki/Encryption for more
 #   details.
 #
-# @param target [Hash]
+# @param target [Hash[String, Variant[String, Integer]]]
 #   Hash containing a number of details for the target system. Currently only b2
 #   is supported by this module.
 #     * 'url' - the url to provide to the init command
@@ -56,7 +56,7 @@
 #     * `b2_id` - ID from your b2 account
 #     * `b2_app_key` - the application key you generated for this bucket
 #
-# @param chunk_parameters [Hash]
+# @param chunk_parameters [Optional[Hash[String, Integer]]]
 #   This hash includes three parameters defining how chunks are handled. The
 #   entire hash is optional, as are the sub components.
 #     * `size` - The target size of each chunk - defaults to 4M
@@ -65,7 +65,7 @@
 define duplicacy::storage (
   String $storage_name = undef,
   String $repo_id = undef,
-  String $path = undef,
+  String $repo_path = undef,
   String $user = undef,
   Hash[String, Variant[String, Integer]] $target = {},
   Optional[Hash[String, Variant[String, Integer]]] $encryption = {},
@@ -174,7 +174,7 @@ define duplicacy::storage (
   # Create the environment file
   file { "env_${repo_id}_${storage_name}":
     ensure  => file,
-    path    => "${path}/.duplicacy/puppet/scripts/${storage_name}.env",
+    path    => "${repo_path}/.duplicacy/puppet/scripts/${storage_name}.env",
     content => epp($file_template, $file_argument),
     owner   => $user,
     group   => $user,
@@ -189,8 +189,8 @@ define duplicacy::storage (
     exec { "init_${repo_id}":
       command     => $repo_init_command,
       path        => '/usr/local/bin:/usr/bin:/bin',
-      cwd         => $path,
-      creates     => "${path}/.duplicacy/preferences",
+      cwd         => $repo_path,
+      creates     => "${repo_path}/.duplicacy/preferences",
       environment => $repo_env,
     }
   } else {
@@ -199,15 +199,15 @@ define duplicacy::storage (
 
     # Build the test command to check if the storage has already been added to
     # the preferences file
-    $test_sed = "sed -e 's/\"//g' ${path}/duplicacy/preferences"
+    $test_sed = "sed -e 's/\"//g' ${repo_path}/duplicacy/preferences"
     $test_awk = "awk '/name/ {print \$2}'"
     $test_grep = "grep ${storage_name}"
     exec { "add_${repo_id}_${storage_name}":
       command     => $repo_add_command,
       path        => '/usr/local/bin:/usr/bin:/bin',
-      cwd         => $path,
+      cwd         => $repo_path,
       onlyif      => [
-        "test -f ${path}/.duplicacy/preferences",
+        "test -f ${repo_path}/.duplicacy/preferences",
         "test 0 -eq \$(${test_sed} | ${test_awk} | ${test_grep} | wc -l)",
       ],
       environment => $repo_env,

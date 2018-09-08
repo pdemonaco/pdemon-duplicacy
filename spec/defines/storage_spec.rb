@@ -8,7 +8,7 @@ describe 'duplicacy::storage' do
       {
         'storage_name' => 'other_bucket',
         'repo_id' => 'test_repo',
-        'path' => '/my/super/safe/data',
+        'repo_path' => '/my/super/safe/data',
         'user' => 'me',
         'target' => {
           'url' => 'b2://test-storage',
@@ -31,7 +31,7 @@ describe 'duplicacy::storage' do
       {
         'storage_name' => 'other_bucket',
         'repo_id' => 'test_repo',
-        'path'    => '/my/super/safe/data',
+        'repo_path' => '/my/super/safe/data',
         'user' => 'me',
       }
     end
@@ -46,7 +46,7 @@ describe 'duplicacy::storage' do
       {
         'storage_name' => 'other_bucket',
         'repo_id' => 'test_repo',
-        'path'    => '/my/super/safe/data',
+        'repo_path' => '/my/super/safe/data',
         'user' => 'me',
         'target' => {
           'garbage' => 'this should be the url',
@@ -64,7 +64,7 @@ describe 'duplicacy::storage' do
       {
         'storage_name' => 'other_bucket',
         'repo_id' => 'test_repo',
-        'path'    => '/my/super/safe/data',
+        'repo_path' => '/my/super/safe/data',
         'user' => 'me',
         'target' => {
           'url' => 'b3://this-isnt-a-thing',
@@ -82,7 +82,7 @@ describe 'duplicacy::storage' do
       {
         'storage_name' => 'other_bucket',
         'repo_id' => 'test_repo',
-        'path'    => '/my/super/safe/data',
+        'repo_path' => '/my/super/safe/data',
         'user' => 'me',
         'target' => {
           'url' => 'b2://no-params',
@@ -100,7 +100,7 @@ describe 'duplicacy::storage' do
       {
         'storage_name' => 'other_bucket',
         'repo_id' => 'test_repo',
-        'path'    => '/my/super/safe/data',
+        'repo_path' => '/my/super/safe/data',
         'user' => 'me',
         'target' => {
           'url' => 'b2://no-params',
@@ -118,7 +118,7 @@ describe 'duplicacy::storage' do
       {
         'storage_name' => 'other_bucket',
         'repo_id' => 'my-repo',
-        'path'    => '/my/super/safe/data',
+        'repo_path' => '/my/super/safe/data',
         'user' => 'me',
         'target' => {
           'url' => 'b2://no-params',
@@ -189,7 +189,7 @@ export DUPLICACY_OTHER_BUCKET_B2_KEY="my-app-key"
       {
         'storage_name' => 'default',
         'repo_id' => 'my-repo',
-        'path' => '/my/super/safe/data',
+        'repo_path' => '/my/super/safe/data',
         'user' => 'me',
         'target' => {
           'url' => 'b2://test-storage',
@@ -246,7 +246,7 @@ export DUPLICACY_PASSWORD="secret-sauce"
       {
         'storage_name' => 'default',
         'repo_id' => 'my-repo',
-        'path' => '/my/super/safe/data',
+        'repo_path' => '/my/super/safe/data',
         'user' => 'me',
         'target' => {
           'url' => 'b2://test-storage',
@@ -292,7 +292,7 @@ export DUPLICACY_PASSWORD="secret-sauce"
       {
         'storage_name' => 'default',
         'repo_id' => 'my-repo',
-        'path' => '/my/super/safe/data',
+        'repo_path' => '/my/super/safe/data',
         'user' => 'me',
         'target' => {
           'url' => 'b2://test-storage',

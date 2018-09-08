@@ -7,7 +7,7 @@ describe 'duplicacy::repository' do
   context 'Missing Targets' do
     let(:params) do
       {
-        'path' => '/my/backup/dir',
+        'repo_path' => '/my/backup/dir',
         'storage_targets' => {},
       }
     end
@@ -19,7 +19,7 @@ describe 'duplicacy::repository' do
   context 'No Default Storage' do
     let(:params) do
       {
-        'path' => '/my/backup/dir',
+        'repo_path' => '/my/backup/dir',
         'storage_targets' => {
           'storage1' => {},
           'storage2' => {},
@@ -34,7 +34,7 @@ describe 'duplicacy::repository' do
   context 'single valid storage' do
     let(:params) do
       {
-        'path' => '/my/backup/dir',
+        'repo_path' => '/my/backup/dir',
         'storage_targets' => {
           'default' => {
             'target' => {
@@ -64,7 +64,7 @@ describe 'duplicacy::repository' do
   context 'single valid storage with filters' do
     let(:params) do
       {
-        'path' => '/my/backup/dir',
+        'repo_path' => '/my/backup/dir',
         'storage_targets' => {
           'default' => {
             'target' => {
@@ -91,9 +91,14 @@ describe 'duplicacy::repository' do
     it { is_expected.to have_file_resource_count(7) }
 
     # One directory should be the duplicacy folder
-    it { is_expected.to contain_file('/my/backup/dir/.duplicacy').with_ensure('directory') }
-    it { is_expected.to contain_file('/my/backup/dir/.duplicacy').with_mode('0700') }
-    it { is_expected.to contain_file('/my/backup/dir/.duplicacy').with_owner('root').with_group('root') }
+    it { 
+      is_expected.to contain_file('/my/backup/dir/.duplicacy').with(
+        'ensure' => 'directory',
+        'mode' => '0700',
+        'owner' => 'root',
+        'group' => 'root',
+      )
+    }
 
     # One directory should be the puppet folder
     it { is_expected.to contain_file('/my/backup/dir/.duplicacy/puppet').with_ensure('directory') }
@@ -109,7 +114,7 @@ describe 'duplicacy::repository' do
     # One storage repo
     it { is_expected.to have_duplicacy__storage_resource_count(1) }
     it { is_expected.to contain_duplicacy__storage('my-repo_default').with_storage_name('default') }
-    it { is_expected.to contain_duplicacy__storage('my-repo_default').with_path('/my/backup/dir') }
+    it { is_expected.to contain_duplicacy__storage('my-repo_default').with_repo_path('/my/backup/dir') }
     it { is_expected.to contain_duplicacy__storage('my-repo_default').that_requires('File[/my/backup/dir/.duplicacy/puppet]') }
 
     # Some filters
@@ -121,7 +126,7 @@ describe 'duplicacy::repository' do
   context 'two valid storages with filters' do
     let(:params) do
       {
-        'path' => '/my/backup/dir',
+        'repo_path' => '/my/backup/dir',
         'storage_targets' => {
           'default' => {
             'target' => {
@@ -155,7 +160,7 @@ describe 'duplicacy::repository' do
     it {
       is_expected.to contain_duplicacy__storage('my-repo_default').with(
         'storage_name' => 'default',
-        'path' => '/my/backup/dir',
+        'repo_path' => '/my/backup/dir',
       )
     }
 
@@ -163,7 +168,7 @@ describe 'duplicacy::repository' do
     it {
       is_expected.to contain_duplicacy__storage('my-repo_other_bucket').with(
         'storage_name' => 'other_bucket',
-        'path' => '/my/backup/dir',
+        'repo_path' => '/my/backup/dir',
       )
     }
 
