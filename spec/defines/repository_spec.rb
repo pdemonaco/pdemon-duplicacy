@@ -91,7 +91,7 @@ describe 'duplicacy::repository' do
     it { is_expected.to have_file_resource_count(7) }
 
     # One directory should be the duplicacy folder
-    it { 
+    it {
       is_expected.to contain_file('/my/backup/dir/.duplicacy').with(
         'ensure' => 'directory',
         'mode' => '0700',

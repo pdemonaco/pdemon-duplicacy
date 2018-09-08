@@ -3,7 +3,7 @@
 #
 # @summary This initializes a storage backend for a particular duplicacy repository.
 #
-# @example
+# @example Fully configured with all options set
 #   duplicacy::storage { 'my-repo_default':
 #     storage_name         => 'default',
 #     repo_id              => 'my-repo',
@@ -39,9 +39,11 @@
 #
 # @param encryption [Optional[Hash[String, Variant[String, Integer]]]]
 #   This hash includes two key parameters related to encryption.
-#     * `password` - this is the password used to encrypt the config file
-#     * `iterations` - the number of iterations to generate the block password.
-#     this is optional and defaults to 16384
+#   * `password` - this is the password used to encrypt the config file
+#   * `iterations` - the number of iterations to generate the block password.
+#
+#   @note `iterations` is optional and defaults to 16384, however, password must
+#   be set.
 # 
 #   If this hash is absent the data will not be encrypted.
 #   See https://github.com/gilbertchen/duplicacy/wiki/Encryption for more
@@ -50,18 +52,18 @@
 # @param target [Hash[String, Variant[String, Integer]]]
 #   Hash containing a number of details for the target system. Currently only b2
 #   is supported by this module.
-#     * 'url' - the url to provide to the init command
+#   * 'url' - the url to provide to the init command
 #
 #   b2 specific arguments
-#     * `b2_id` - ID from your b2 account
-#     * `b2_app_key` - the application key you generated for this bucket
+#   * `b2_id` - ID from your b2 account
+#   * `b2_app_key` - the application key you generated for this bucket
 #
 # @param chunk_parameters [Optional[Hash[String, Integer]]]
 #   This hash includes three parameters defining how chunks are handled. The
 #   entire hash is optional, as are the sub components.
-#     * `size` - The target size of each chunk - defaults to 4M
-#     * `max` - largest possible chunk size - defaults to $size * 4
-#     * `min` - smallest possible chunk size - defaults to $size / 4
+#   * `size` - The target size of each chunk - defaults to 4M
+#   * `max` - largest possible chunk size - defaults to $size * 4
+#   * `min` - smallest possible chunk size - defaults to $size / 4
 define duplicacy::storage (
   String $storage_name = undef,
   String $repo_id = undef,

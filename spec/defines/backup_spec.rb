@@ -7,7 +7,7 @@ describe 'duplicacy::backup' do
     let(:params) do
       {
         'storage_name' => 'default',
-        'repo_dir' => '/backup/dir',
+        'repo_path' => '/backup/dir',
         'pref_dir' => '/backup/dir/.duplicacy',
         'user' => 'root',
         'email_recipient' => 'batman',
@@ -22,7 +22,7 @@ describe 'duplicacy::backup' do
     let(:params) do
       {
         'storage_name' => 'default',
-        'repo_dir' => '/backup/dir',
+        'repo_path' => '/backup/dir',
         'pref_dir' => '/backup/dir/.duplicacy',
         'user' => 'root',
         'email_recipient' => 'user@example.com',
@@ -36,7 +36,7 @@ describe 'duplicacy::backup' do
     let(:params) do
       {
         'storage_name' => 'default',
-        'repo_dir' => '/backup/dir',
+        'repo_path' => '/backup/dir',
         'pref_dir' => '/backup/dir/.duplicacy',
         'user' => 'root',
         'cron_entry' => {
@@ -132,7 +132,7 @@ rm "${LOCK_FILE}"
     let(:params) do
       {
         'storage_name' => 'default',
-        'repo_dir' => '/backup/dir',
+        'repo_path' => '/backup/dir',
         'pref_dir' => '/backup/dir/.duplicacy',
         'user' => 'root',
         'email_recipient' => 'user@example.com',
@@ -200,7 +200,7 @@ echo "[$]{MESSAGE}" [|] mutt -s "Duplicacy Backup [$]{BACKUP_NAME} - [$]{STATUS}
     let(:params) do
       {
         'storage_name' => 'default',
-        'repo_dir' => '/backup/dir',
+        'repo_path' => '/backup/dir',
         'pref_dir' => '/backup/dir/.duplicacy',
         'user' => 'root',
         'cron_entry' => {
@@ -225,7 +225,7 @@ echo "[$]{MESSAGE}" [|] mutt -s "Duplicacy Backup [$]{BACKUP_NAME} - [$]{STATUS}
     let(:params) do
       {
         'storage_name' => 'default',
-        'repo_dir' => '/backup/dir',
+        'repo_path' => '/backup/dir',
         'pref_dir' => '/backup/dir/.duplicacy',
         'user' => 'root',
         'cron_entry' => {
@@ -250,7 +250,7 @@ echo "[$]{MESSAGE}" [|] mutt -s "Duplicacy Backup [$]{BACKUP_NAME} - [$]{STATUS}
     let(:params) do
       {
         'storage_name' => 'default',
-        'repo_dir' => '/backup/dir',
+        'repo_path' => '/backup/dir',
         'pref_dir' => '/backup/dir/.duplicacy',
         'user' => 'root',
         'cron_entry' => {
@@ -275,7 +275,7 @@ echo "[$]{MESSAGE}" [|] mutt -s "Duplicacy Backup [$]{BACKUP_NAME} - [$]{STATUS}
     let(:params) do
       {
         'storage_name' => 'other_bucket',
-        'repo_dir' => '/my/super/safe/data',
+        'repo_path' => '/my/super/safe/data',
         'pref_dir' => '/my/super/safe/data/.duplicacy',
         'user' => 'root',
         'cron_entry' => {
