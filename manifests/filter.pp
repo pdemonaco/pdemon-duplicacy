@@ -1,6 +1,9 @@
-# A description of what this defined type does
+# This type takes an ordered list of duplicity filter rules and inserts them
+# into the filters file for a specific repository. For more detail on the filter
+# rules see the [duplicacy
+# wiki](https://github.com/gilbertchen/duplicacy/wiki/Include-Exclude-Patterns).
 #
-# @summary A short summary of the purpose of this defined type.
+# @summary Creates a filters file for this repository.
 #
 # @example
 #   duplicacy::filter { 'my-repo_filters':
@@ -12,15 +15,15 @@
 #     ],
 #   }
 #
-# @pref_dir [String]
+# @param pref_dir [String]
 #   Path to the '.duplicacy' directory in which this filters file should be
 #   defined.
 #
-# @user [String]
+# @param user [String]
 #   Who should own this file? Typically this is also who runs the backups and
 #   owns the associated data.
 #
-# @rules [Array]
+# @param rules [Array]
 #   An array of strings which each correspond to a line of the filter file. See
 #   the https://github.com/gilbertchen/duplicacy/wiki/Include-Exclude-Patterns
 #   page for more detail.
