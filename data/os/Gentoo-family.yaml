@@ -1,2 +1,3 @@
 ---
 duplicacy::package_name: [ 'app-backup/duplicacy-bin' ]
+duplicacy::mail_package_name: [ 'mail-client/mutt' ]

@@ -1,5 +1,5 @@
 ---
-duplicacy::package_name: 'duplicacy'
+duplicacy::package_name: [ 'duplicacy' ]
+duplicacy::mail_package_name: [ 'mutt' ]
 
-lookup_options:
-
+#lookup_options:
