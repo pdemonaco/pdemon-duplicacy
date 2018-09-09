@@ -41,8 +41,8 @@ describe 'duplicacy' do
             '+foo/baz/*',
             '-*',
           ],
-          'backup_schedules' => [
-            {
+          'backup_schedules' => {
+            'daily-0130' => {
               'storage_name' => 'default',
               'cron_entry' => {
                 'hour' => '1',
@@ -51,7 +51,7 @@ describe 'duplicacy' do
               'threads' => 8,
               'email_recipient' => 'me@example.com',
             },
-          ],
+          },
         },
       },
     }

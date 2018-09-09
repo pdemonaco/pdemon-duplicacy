@@ -7,9 +7,9 @@
 #
 # @example
 #   duplicacy::filter { 'my-repo_filters':
-#     $pref_dir       => '/my/repo/dir/.duplicacy',
-#     $user           => 'me',
-#     $rules => [ 
+#     pref_dir       => '/my/repo/dir/.duplicacy',
+#     user           => 'me',
+#     rules => [ 
 #       '+foo/bar/*',
 #       '-*',
 #     ],

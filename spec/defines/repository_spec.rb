@@ -214,8 +214,8 @@ describe 'duplicacy::repository' do
           '+foo/baz/*',
           '-*',
         ],
-        'backup_schedules' => [
-          {
+        'backup_schedules' => {
+          'daily-0130' => {
             'storage_name' => 'default',
             'cron_entry' => {
               'hour' => '1',
@@ -224,7 +224,7 @@ describe 'duplicacy::repository' do
             'threads' => 8,
             'email_recipient' => 'me@example.com',
           },
-        ],
+        },
       }
     end
 
@@ -232,7 +232,7 @@ describe 'duplicacy::repository' do
 
     # Ensure that the schedule is created
     it {
-      is_expected.to contain_duplicacy__backup('my-repo_default_backup_0').with(
+      is_expected.to contain_duplicacy__backup('my-repo_default_backup_daily-0130').with(
         'repo_path' => '/my/backup/dir',
         'user' => 'root',
         'threads' => 8,

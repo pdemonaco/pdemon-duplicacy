@@ -3,8 +3,40 @@
 # @summary 
 #    This class manages the deployment of Duplicacy on a server.
 #
-# @example
-#   include duplicacy
+# @example Configuring a local repo for root's home directory which is backed up
+# once every hour
+# 
+#   duplicacy {
+#     local_repos          => [ 'root-home' ],
+#     repos                => {
+#       root-home          => {
+#         repo_path        => '/root',
+#         user             => 'root',
+#         storage_targets  => {
+#           default        => {
+#             target       => {
+#               url        => 'b2://pdemon-duplicacy-test',
+#               b2_id      => 'my-b2-id-is-a-secret',
+#               b2_app_key => 'so is my key'
+#             },
+#             encryption => {
+#               password => 'my-secret-password'
+#             },
+#           },
+#         },
+#         backup_schedules => {
+#           hourly => {
+#             storage_name => 'default',
+#             cron_entry   => {
+#               'minute'   => '30',
+#             },
+#             'threads'         => 4,
+#             'email_recipient' => phil@demona.co,
+#           },
+#         },
+#       },
+#     },
+#   }
 #
 # @param package_name [Array[String]]
 #   Package or list of packages needed to install duplicacy on this host.
@@ -19,14 +51,44 @@
 # @param repos [Hash]
 #   A Hash where the keys are the names of the repositories to be deployed on
 #   this system are stored. This is a very deep structure.
+#
 class duplicacy (
   Array[String] $package_name,
   Array[String] $mail_package_name,
   Array[String] $local_repos,
-  Hash[String, Hash[String, Variant[String, Hash[String, Variant[String,
-  Hash[String, Variant[String, Hash[String, Variant[String, Integer]]]]]],
-  Array[String], Array[Hash[String, Variant[String, Integer, Hash[String,
-  Variant[String, Integer]]]]]]]] $repos = {},
+  Hash[String,
+    Hash[String,
+      Variant[
+        String,
+        Array[String],
+        Hash[String,
+          Variant[
+            String,
+            Hash[String,
+              Variant[
+                String,
+                Integer
+              ]
+            ]
+          ]
+        ],
+        Hash[String,
+          Hash[String,
+            Variant[
+              String,
+              Integer,
+              Hash[String,
+                Variant[
+                  String,
+                  Integer
+                ]
+              ]
+            ]
+          ]
+        ]
+      ]
+    ]
+  ] $repos = {},
 ) {
   # Ensure the duplicacy package is present
   package { $duplicacy::package_name:

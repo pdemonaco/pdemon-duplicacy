@@ -57,7 +57,7 @@
 #   subtype must be omitted here. Specifically, `repo_id`, `repo_path`, and 
 #   `user` as these are all overridden.
 #
-# @param backup_schedules Optional[Array[Hash[String, Variant[String, Integer, Hash[String, Variant[String, Integer]]]]]]
+# @param backup_schedules Optional[Hash[String, Hash[String, Variant[String, Integer, Hash[String, Variant[String, Integer]]]]]]
 #   A list of parameters and schedules for the execution of a series of backups
 #   of this repository. If no schedules are provided this machine will not
 #   backup this repository.
@@ -77,7 +77,7 @@ define duplicacy::repository (
   String $repo_path = undef,
   String $user = 'root',
   Hash[String, Variant[String, Hash[String, Variant[String, Hash[String, Variant[String, Integer]]]]]] $storage_targets = {},
-  Optional[Array[Hash[String, Variant[String, Integer, Hash[String, Variant[String, Integer]]]]]] $backup_schedules = [],
+  Optional[Hash[String, Hash[String, Variant[String, Integer, Hash[String, Variant[String, Integer]]]]]] $backup_schedules = {},
   Optional[Array[String]] $filter_rules = [],
   Optional[String] $log_retention = '4w',
 ) {
@@ -170,9 +170,9 @@ define duplicacy::repository (
 
   # Schedule Backups
   unless(empty($backup_schedules)) {
-    $backup_schedules.each | $index, $schedule | {
+    $backup_schedules.each | $title, $schedule | {
       $storage_name = $schedule['storage_name']
-      duplicacy::backup { "${repo_id}_${storage_name}_backup_${index}":
+      duplicacy::backup { "${repo_id}_${storage_name}_backup_${title}":
         repo_path => $repo_path,
         user      => $user,
         *         => $schedule,

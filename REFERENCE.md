@@ -20,12 +20,46 @@
 
 A class to configure and manage duplicacy backup instances.
 
+once every hour
+
+  duplicacy {
+    local_repos          => [ 'root-home' ],
+    repos                => {
+      root-home          => {
+        repo_path        => '/root',
+        user             => 'root',
+        storage_targets  => {
+          default        => {
+            target       => {
+              url        => 'b2://pdemon-duplicacy-test',
+              b2_id      => 'my-b2-id-is-a-secret',
+              b2_app_key => 'so is my key'
+            },
+            encryption => {
+              password => 'my-secret-password'
+            },
+          },
+        },
+        backup_schedules => {
+          hourly => {
+            storage_name => 'default',
+            cron_entry   => {
+              'minute'   => '30',
+            },
+            'threads'         => 4,
+            'email_recipient' => phil@demona.co,
+          },
+        },
+      },
+    },
+  }
+
 #### Examples
 
-##### 
+##### Configuring a local repo for root's home directory which is backed up
 
 ```puppet
-include duplicacy
+
 ```
 
 #### Parameters
@@ -44,12 +78,51 @@ Data type: `Array[String]`
 
 Package or list of packages needed to send email from this host.
 
+##### `local_repos`
+
+Data type: `Array[String]`
+
+List of repo names which should be deployed on this machine. Note that
+each repo must be defined in the `repos` parameter.
+
 ##### `repos`
 
-Data type: `Hash[String, Hash[String, Variant[String, Hash[String, String]]]]`
+Data type: `Hash[String,
+    Hash[String,
+      Variant[
+        String,
+        Array[String],
+        Hash[String,
+          Variant[
+            String,
+            Hash[String,
+              Variant[
+                String,
+                Integer
+              ]
+            ]
+          ]
+        ],
+        Hash[String,
+          Hash[String,
+            Variant[
+              String,
+              Integer,
+              Hash[String,
+                Variant[
+                  String,
+                  Integer
+                ]
+              ]
+            ]
+          ]
+        ]
+      ]
+    ]
+  ]`
 
 A Hash where the keys are the names of the repositories to be deployed on
-this system are stored.
+this system are stored. This is a very deep structure.
 
 Default value: {}
 
@@ -207,9 +280,9 @@ wiki](https://github.com/gilbertchen/duplicacy/wiki/Include-Exclude-Patterns).
 
 ```puppet
 duplicacy::filter { 'my-repo_filters':
-  $pref_dir       => '/my/repo/dir/.duplicacy',
-  $user           => 'me',
-  $rules => [
+  pref_dir       => '/my/repo/dir/.duplicacy',
+  user           => 'me',
+  rules => [
     '+foo/bar/*',
     '-*',
   ],
@@ -338,16 +411,16 @@ Default value: {}
 
 ##### `backup_schedules`
 
-Data type: `Optional[Array[Hash[String, Variant[String, Integer, Hash[String, Variant[String, Integer]]]]]]`
+Data type: `Optional[Hash[String, Hash[String, Variant[String, Integer, Hash[String, Variant[String, Integer]]]]]]`
 
-Optional[Array[Hash[String, Variant[String, Integer, Hash[String, Variant[String, Integer]]]]]]
+Optional[Hash[String, Hash[String, Variant[String, Integer, Hash[String, Variant[String, Integer]]]]]]
 A list of parameters and schedules for the execution of a series of backups
 of this repository. If no schedules are provided this machine will not
 backup this repository.
 
 @note The following parameters must not be specified: `user`, `repo_path`
 
-Default value: []
+Default value: {}
 
 ##### `filter_rules`
 
