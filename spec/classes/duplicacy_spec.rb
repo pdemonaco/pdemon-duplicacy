@@ -4,17 +4,17 @@ require 'deep_merge'
 describe 'duplicacy' do
   let(:facts) do
     {
-      "os" => {
-        "architecture" => "amd64",
-        "family" => "Gentoo",
-        "hardware" => "x86_64",
-        "name" => "Gentoo",
-        "release" => {
-          "full" =>  "2.4.1",
-          "major" => "2",
-          "minor" => "4"
+      'os' => {
+        'architecture' => 'amd64',
+        'family' => 'Gentoo',
+        'hardware' => 'x86_64',
+        'name' => 'Gentoo',
+        'release' => {
+          'full' =>  '2.4.1',
+          'major' => '2',
+          'minor' => '4',
         },
-      }
+      },
     }
   end
 
