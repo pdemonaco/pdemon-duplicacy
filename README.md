@@ -1,15 +1,6 @@
-
 # duplicacy
 
-Welcome to your new module. A short overview of the generated parts can be found in the PDK documentation at https://puppet.com/pdk/latest/pdk_generating_modules.html .
-
-The README template below provides a starting point with details about what information to include in your README.
-
-
-
-
-
-
+[![pipeline status](https://gitlab.com/pdemon/pdemon-duplicacy/badges/master/pipeline.svg)](https://gitlab.com/pdemon/pdemon-duplicacy/commits/master)
 
 #### Table of Contents
 
@@ -51,6 +42,15 @@ The very basic steps needed for a user to get the module up and running. This ca
 ## Usage
 
 Include usage examples for common use cases in the **Usage** section. Show your users how to use your module to solve problems, and be sure to include code examples. Include three to five examples of the most important or common tasks a user can accomplish with your module. Show users how to accomplish more complex tasks that involve different types, classes, and functions working in tandem.
+
+### Repository Definition
+
+Possible attributes
+
+* `id` - the ID of the repository as referenced in Duplicacy. This defaults to the name.
+* `encrypt` - 
+
+### 
 
 ## Reference
 

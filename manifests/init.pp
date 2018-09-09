@@ -7,14 +7,14 @@
 #   include duplicacy
 #
 # @param package_name [Array[String]]
-#   Package or list of packages needed for this particular target system.
+#   Package or list of packages needed to install duplicacy on this host.
 #
-# @param mail_package_name [Optional[Array[String]]]
-#   Package or list of packages needed for this particular target system.
+# @param mail_package_name [Array[String]]
+#   Package or list of packages needed to send email from this host.
 #
 # @param repos [Hash]
-#   A Hash where the keys are the names of the repositories which should be
-#   managed and the values are a Hash of the repositories parameters.
+#   A Hash where the keys are the names of the repositories to be deployed on
+#   this system are stored.
 class duplicacy (
   Array[String] $package_name,
   Array[String] $mail_package_name,
@@ -30,5 +30,6 @@ class duplicacy (
     ensure => present
   }
 
-  # TODO - Create repositories
+  # Create repositories
+
 }
