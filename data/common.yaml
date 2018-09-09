@@ -2,4 +2,11 @@
 duplicacy::package_name: [ 'duplicacy' ]
 duplicacy::mail_package_name: [ 'mutt' ]
 
-#lookup_options:
+lookup_options:
+  duplicacy::repos:
+    merge:
+      strategy: 'deep'
+      knockout_prefix: '--'
+      merge_hash_arrays: true
+  duplicacy::local_repos:
+    merge: 'unique'
