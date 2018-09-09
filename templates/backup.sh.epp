@@ -24,7 +24,7 @@ SCRIPT_DIR="${PUPPET_DIR}/scripts"
 
 # Config files
 LOCK_FILE="${LOCK_DIR}/<%= $storage_name %>.lock"
-ENV_CONFIG="${SCRIPT_DIR}/${STORAGE_NAME}.env"
+ENV_FILE="${SCRIPT_DIR}/${STORAGE_NAME}.env"
 LOG_FILE="${LOG_DIR}/${BACKUP_NAME}_${STORAGE_NAME}_${TIMESTAMP}.log"
 
 #==== Check for locks and aquire
@@ -47,7 +47,7 @@ acquire_backup_lock()
 acquire_backup_lock
 
 # Retrieve our credentials
-source "${PUPPET_DIR}/${ENV_CONFIG}"
+source "${ENV_FILE}"
 
 # Move to the root of the repository
 cd "${REPO_DIR}"

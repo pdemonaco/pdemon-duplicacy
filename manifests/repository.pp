@@ -164,8 +164,8 @@ define duplicacy::repository (
 
   # Tidy any logs created by the jobs running on this system.
   tidy { "${pref_dir}/puppet/logs":
-    require => File["${pref_dir}/puppet/logs"],
     age     => $log_retention,
+    require => File["${pref_dir}/puppet/logs"]
   }
 
   # Schedule Backups
