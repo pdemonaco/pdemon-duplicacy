@@ -175,8 +175,8 @@ export DUPLICACY_OTHER_BUCKET_B2_KEY="my-app-key"
     it {
       is_expected.to contain_exec('add_my-repo_other_bucket').with_environment(
         [
-          'DUPLICACY_OTHER_BUCKET_B2_ID=my-id',
-          'DUPLICACY_OTHER_BUCKET_B2_KEY=my-app-key',
+          'DUPLICACY_OTHER_BUCKET_B2_ID="my-id"',
+          'DUPLICACY_OTHER_BUCKET_B2_KEY="my-app-key"',
         ],
       )
     }
@@ -231,9 +231,9 @@ export DUPLICACY_PASSWORD="secret-sauce"
     it {
       is_expected.to contain_exec('init_my-repo').with_environment(
         [
-          'DUPLICACY_PASSWORD=secret-sauce',
-          'DUPLICACY_B2_ID=this-is-my-accound-id',
-          'DUPLICACY_B2_KEY=this-is-my-key',
+          'DUPLICACY_PASSWORD="secret-sauce"',
+          'DUPLICACY_B2_ID="this-is-my-accound-id"',
+          'DUPLICACY_B2_KEY="this-is-my-key"',
         ],
       )
     }
@@ -277,9 +277,9 @@ export DUPLICACY_PASSWORD="secret-sauce"
     it {
       is_expected.to contain_exec('init_my-repo').with_environment(
         [
-          'DUPLICACY_PASSWORD=secret-sauce',
-          'DUPLICACY_B2_ID=this-is-my-accound-id',
-          'DUPLICACY_B2_KEY=this-is-my-key',
+          'DUPLICACY_PASSWORD="secret-sauce"',
+          'DUPLICACY_B2_ID="this-is-my-accound-id"',
+          'DUPLICACY_B2_KEY="this-is-my-key"',
         ],
       )
     }
@@ -320,9 +320,9 @@ export DUPLICACY_PASSWORD="secret-sauce"
     it {
       is_expected.to contain_exec('init_my-repo').with_environment(
         [
-          'DUPLICACY_PASSWORD=secret-sauce',
-          'DUPLICACY_B2_ID=this-is-my-accound-id',
-          'DUPLICACY_B2_KEY=this-is-my-key',
+          'DUPLICACY_PASSWORD="secret-sauce"',
+          'DUPLICACY_B2_ID="this-is-my-accound-id"',
+          'DUPLICACY_B2_KEY="this-is-my-key"',
         ],
       )
     }

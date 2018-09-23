@@ -86,7 +86,7 @@ define duplicacy::storage (
     # Extract the password, this is mandatory
     if 'password' in $encryption {
       $password = $encryption['password']
-      $env_encryption = [ "${env_prefix}_PASSWORD=${password}" ]
+      $env_encryption = [ "${env_prefix}_PASSWORD=\"${password}\"" ]
     } else {
       fail('Password mandatory when encryption is enabled!')
     }
@@ -156,8 +156,8 @@ define duplicacy::storage (
       $b2_id = $target['b2_id']
       $b2_app_key = $target['b2_app_key']
       $env_storage = [
-        "${env_prefix}_B2_ID=${b2_id}",
-        "${env_prefix}_B2_KEY=${b2_app_key}"
+        "${env_prefix}_B2_ID=\"${b2_id}\"",
+        "${env_prefix}_B2_KEY=\"${b2_app_key}\"",
       ]
       $cmd_args = " ${repo_id} ${storage_url}"
       $file_template = 'duplicacy/b2.env.epp'
