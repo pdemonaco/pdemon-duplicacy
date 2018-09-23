@@ -3,9 +3,7 @@
 # @summary 
 #    This class manages the deployment of Duplicacy on a server.
 #
-# @example Configuring a local repo for root's home directory which is backed up
-# once every hour
-# 
+# @example Configuring a local repo for root's home directory which is backed up once every hour
 #   duplicacy {
 #     local_repos          => [ 'root-home' ],
 #     repos                => {
@@ -67,7 +65,7 @@ class duplicacy (
             Hash[String,
               Variant[
                 String,
-                Integer
+                Integer,
               ]
             ]
           ]
@@ -80,7 +78,7 @@ class duplicacy (
               Hash[String,
                 Variant[
                   String,
-                  Integer
+                  Integer,
                 ]
               ]
             ]
@@ -92,12 +90,12 @@ class duplicacy (
 ) {
   # Ensure the duplicacy package is present
   package { $duplicacy::package_name:
-    ensure => present
+    ensure => present,
   }
 
   # Ensure the mail client is present (mutt)
   package { $duplicacy::mail_package_name:
-    ensure => present
+    ensure => present,
   }
 
   # Create repositories

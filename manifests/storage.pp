@@ -86,7 +86,6 @@ define duplicacy::storage (
     # Extract the password, this is mandatory
     if 'password' in $encryption {
       $password = $encryption['password']
-      $env_encryption = [ "${env_prefix}_PASSWORD=\"${password}\"" ]
     } else {
       fail('Password mandatory when encryption is enabled!')
     }
@@ -100,7 +99,6 @@ define duplicacy::storage (
   } else {
     $password = undef
     $cmd_encryption = ''
-    $env_encryption = []
   }
 
   # Process chunk arguments
@@ -155,10 +153,6 @@ define duplicacy::storage (
       }
       $b2_id = $target['b2_id']
       $b2_app_key = $target['b2_app_key']
-      $env_storage = [
-        "${env_prefix}_B2_ID=\"${b2_id}\"",
-        "${env_prefix}_B2_KEY=\"${b2_app_key}\"",
-      ]
       $cmd_args = " ${repo_id} ${storage_url}"
       $file_template = 'duplicacy/b2.env.epp'
       $file_argument = {
@@ -183,23 +177,25 @@ define duplicacy::storage (
     mode    => '0600',
   }
 
+  # Source environment
+  $cmd_env = "source ${repo_path}/.duplicacy/puppet/scripts/${storage_name}.env"
+
   # Log file target
-  $cmd_log_args = " > ${repo_path}/.duplicacy/puppet/logs/${repo_id}_init.log"
+  $cmd_log_args = " > \
+    ${repo_path}/.duplicacy/puppet/logs/${repo_id}_init.log"
 
   # Initialize the storage for this repository
-  $repo_env = $env_encryption + $env_storage
   if $env_prefix =~ /DUPLICACY$/ {
-    $cmd_base = 'duplicacy init'
+    $cmd_base = "${cmd_env}; duplicacy init"
     $repo_init_command = "${cmd_base}${cmd_encryption}${cmd_chunks}${cmd_args}"
     exec { "init_${repo_id}":
-      command     => "${repo_init_command}${cmd_log_args}",
-      path        => '/usr/local/bin:/usr/bin:/bin',
-      cwd         => $repo_path,
-      creates     => "${repo_path}/.duplicacy/preferences",
-      environment => $repo_env,
+      command => "${repo_init_command}${cmd_log_args}",
+      path    => '/usr/local/bin:/usr/bin:/bin',
+      cwd     => $repo_path,
+      creates => "${repo_path}/.duplicacy/preferences",
     }
   } else {
-    $cmd_base = 'duplicacy add'
+    $cmd_base = "${cmd_env}; duplicacy add"
     $repo_add_command = "${cmd_base}${cmd_encryption}${cmd_chunks} ${storage_name}${cmd_args}"
 
     # Build the test command to check if the storage has already been added to
@@ -208,14 +204,13 @@ define duplicacy::storage (
     $test_awk = "awk '/name/ {print \$2}'"
     $test_grep = "grep ${storage_name}"
     exec { "add_${repo_id}_${storage_name}":
-      command     => "${repo_add_command}${cmd_log_args}",
-      path        => '/usr/local/bin:/usr/bin:/bin',
-      cwd         => $repo_path,
-      onlyif      => [
+      command => "${repo_add_command}${cmd_log_args}",
+      path    => '/usr/local/bin:/usr/bin:/bin',
+      cwd     => $repo_path,
+      onlyif  => [
         "test -f ${repo_path}/.duplicacy/preferences",
         "test 0 -eq \$(${test_sed} | ${test_awk} | ${test_grep} | wc -l)",
       ],
-      environment => $repo_env,
     }
   }
 }

@@ -20,46 +20,42 @@
 
 A class to configure and manage duplicacy backup instances.
 
-once every hour
+#### Examples
 
-  duplicacy {
-    local_repos          => [ 'root-home' ],
-    repos                => {
-      root-home          => {
-        repo_path        => '/root',
-        user             => 'root',
-        storage_targets  => {
-          default        => {
-            target       => {
-              url        => 'b2://pdemon-duplicacy-test',
-              b2_id      => 'my-b2-id-is-a-secret',
-              b2_app_key => 'so is my key'
-            },
-            encryption => {
-              password => 'my-secret-password'
-            },
+##### Configuring a local repo for root's home directory which is backed up once every hour
+
+```puppet
+duplicacy {
+  local_repos          => [ 'root-home' ],
+  repos                => {
+    root-home          => {
+      repo_path        => '/root',
+      user             => 'root',
+      storage_targets  => {
+        default        => {
+          target       => {
+            url        => 'b2://pdemon-duplicacy-test',
+            b2_id      => 'my-b2-id-is-a-secret',
+            b2_app_key => 'so is my key'
           },
-        },
-        backup_schedules => {
-          hourly => {
-            storage_name => 'default',
-            cron_entry   => {
-              'minute'   => '30',
-            },
-            'threads'         => 4,
-            'email_recipient' => phil@demona.co,
+          encryption => {
+            password => 'my-secret-password'
           },
         },
       },
+      backup_schedules => {
+        hourly => {
+          storage_name => 'default',
+          cron_entry   => {
+            'minute'   => '30',
+          },
+          'threads'         => 4,
+          'email_recipient' => phil@demona.co,
+        },
+      },
     },
-  }
-
-#### Examples
-
-##### Configuring a local repo for root's home directory which is backed up
-
-```puppet
-
+  },
+}
 ```
 
 #### Parameters
@@ -98,7 +94,7 @@ Data type: `Hash[String,
             Hash[String,
               Variant[
                 String,
-                Integer
+                Integer,
               ]
             ]
           ]
@@ -111,7 +107,7 @@ Data type: `Hash[String,
               Hash[String,
                 Variant[
                   String,
-                  Integer
+                  Integer,
                 ]
               ]
             ]

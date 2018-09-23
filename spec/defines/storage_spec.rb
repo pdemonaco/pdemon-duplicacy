@@ -130,11 +130,16 @@ describe 'duplicacy::storage' do
 
     it { is_expected.to compile.with_all_deps }
 
+    log_dir = '.duplicacy/puppet/logs'
+    script_dir = '.duplicacy/puppet/scripts'
+    base_command = 'duplicacy add'
+
     # Validate the command
     it {
       is_expected.to contain_exec('add_my-repo_other_bucket').with(
-        command: %r{duplicacy add other_bucket my-repo b2://no-params > /my/super/safe/data/.duplicacy/puppet/logs/my-repo_init.log},
-        cwd: '/my/super/safe/data',
+        command: %r{source #{params['repo_path']}/#{script_dir}/other_bucket.env; #{base_command} other_bucket my-repo b2://no-params > \
+    #{params['repo_path']}/#{log_dir}/my-repo_init.log},
+        cwd: params['repo_path'],
         path: '/usr/local/bin:/usr/bin:/bin',
       )
     }
@@ -164,10 +169,6 @@ export DUPLICACY_OTHER_BUCKET_B2_KEY="my-app-key"
           'test -f /my/super/safe/data/.duplicacy/preferences',
           'test 0 -eq $(sed -e \'s/"//g\' /my/super/safe/data/duplicacy/preferences | awk \'/name/ {print $2}\' | grep other_bucket | wc -l)',
         ],
-        environment: [
-          'DUPLICACY_OTHER_BUCKET_B2_ID="my-id"',
-          'DUPLICACY_OTHER_BUCKET_B2_KEY="my-app-key"',
-        ],
       )
     }
   end
@@ -195,11 +196,16 @@ export DUPLICACY_OTHER_BUCKET_B2_KEY="my-app-key"
     # Ensure it compiles
     it { is_expected.to compile.with_all_deps }
 
+    log_dir = '.duplicacy/puppet/logs'
+    script_dir = '.duplicacy/puppet/scripts'
+    base_command = 'duplicacy init -e'
+
     # Validate the command
     it {
       is_expected.to contain_exec('init_my-repo').with(
-        command: %r{duplicacy init -e my-repo b2://test-storage > /my/super/safe/data/.duplicacy/puppet/logs/my-repo_init.log},
-        cwd: '/my/super/safe/data',
+        command: %r{source /my/super/safe/data/#{script_dir}/default.env; #{base_command} my-repo b2://test-storage > \
+    #{params['repo_path']}/#{log_dir}/my-repo_init.log},
+        cwd: params['repo_path'],
       )
     }
 
@@ -217,17 +223,6 @@ export DUPLICACY_B2_KEY="this-is-my-key"
 # Export Encryption Password
 export DUPLICACY_PASSWORD="secret-sauce"
 ',
-        ],
-      )
-    }
-
-    # Validate the environment
-    it {
-      is_expected.to contain_exec('init_my-repo').with_environment(
-        [
-          'DUPLICACY_PASSWORD="secret-sauce"',
-          'DUPLICACY_B2_ID="this-is-my-accound-id"',
-          'DUPLICACY_B2_KEY="this-is-my-key"',
         ],
       )
     }
@@ -262,17 +257,17 @@ export DUPLICACY_PASSWORD="secret-sauce"
     # Ensure it compiles
     it { is_expected.to compile.with_all_deps }
 
+    log_dir = '.duplicacy/puppet/logs'
+    script_dir = '.duplicacy/puppet/scripts'
+    base_command = 'duplicacy init -e -iterations 32768 -c 4194304 -max 16777216 -min 1048576'
+
     # Validate the command
     it {
       is_expected.to contain_exec('init_my-repo').with(
-        command: %r{duplicacy init -e -iterations 32768 -c 4194304 -max 16777216 -min 1048576 my-repo b2://test-storage > /my/super/safe/data/.duplicacy/puppet/logs/my-repo_init.log},
-        cwd: '/my/super/safe/data',
+        command: "source #{params['repo_path']}/#{script_dir}/#{params['storage_name']}.env; #{base_command} #{params['repo_id']} b2://test-storage > \
+    #{params['repo_path']}/#{log_dir}/#{params['repo_id']}_init.log",
+        cwd: params['repo_path'],
         path: '/usr/local/bin:/usr/bin:/bin',
-        environment: [
-          'DUPLICACY_PASSWORD="secret-sauce"',
-          'DUPLICACY_B2_ID="this-is-my-accound-id"',
-          'DUPLICACY_B2_KEY="this-is-my-key"',
-        ],
       )
     }
   end
@@ -303,17 +298,17 @@ export DUPLICACY_PASSWORD="secret-sauce"
     # Ensure it compiles
     it { is_expected.to compile.with_all_deps }
 
+    log_dir = '.duplicacy/puppet/logs'
+    script_dir = '.duplicacy/puppet/scripts'
+    base_command = 'duplicacy init -e -c 8388608 -max 33554432 -min 2097152'
+
     # Validate the command
     it {
       is_expected.to contain_exec('init_my-repo').with(
-        command: %r{duplicacy init -e -c 8388608 -max 33554432 -min 2097152 my-repo b2://test-storage > /my/super/safe/data/.duplicacy/puppet/logs/my-repo_init.log},
-        cwd: '/my/super/safe/data',
+        command: "source #{params['repo_path']}/#{script_dir}/default.env; #{base_command} my-repo b2://test-storage > \
+    #{params['repo_path']}/#{log_dir}/my-repo_init.log",
+        cwd: params['repo_path'],
         path: '/usr/local/bin:/usr/bin:/bin',
-        environment: [
-          'DUPLICACY_PASSWORD="secret-sauce"',
-          'DUPLICACY_B2_ID="this-is-my-accound-id"',
-          'DUPLICACY_B2_KEY="this-is-my-key"',
-        ],
       )
     }
   end
