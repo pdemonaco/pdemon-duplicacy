@@ -183,13 +183,16 @@ define duplicacy::storage (
     mode    => '0600',
   }
 
+  # Log file target
+  $cmd_log_args = " > ${repo_path}/.duplicacy/puppet/logs/${repo_id}_init.log"
+
   # Initialize the storage for this repository
   $repo_env = $env_encryption + $env_storage
   if $env_prefix =~ /DUPLICACY$/ {
     $cmd_base = 'duplicacy init'
     $repo_init_command = "${cmd_base}${cmd_encryption}${cmd_chunks}${cmd_args}"
     exec { "init_${repo_id}":
-      command     => $repo_init_command,
+      command     => "${repo_init_command}${cmd_log_args}",
       path        => '/usr/local/bin:/usr/bin:/bin',
       cwd         => $repo_path,
       creates     => "${repo_path}/.duplicacy/preferences",
@@ -205,7 +208,7 @@ define duplicacy::storage (
     $test_awk = "awk '/name/ {print \$2}'"
     $test_grep = "grep ${storage_name}"
     exec { "add_${repo_id}_${storage_name}":
-      command     => $repo_add_command,
+      command     => "${repo_add_command}${cmd_log_args}",
       path        => '/usr/local/bin:/usr/bin:/bin',
       cwd         => $repo_path,
       onlyif      => [

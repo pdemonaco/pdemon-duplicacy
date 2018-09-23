@@ -145,7 +145,7 @@ define duplicacy::repository (
           Duplicacy::Storage["${repo_id}_default"],
           File["${pref_dir}/puppet"],
         ],
-        *            => $params
+        *            => $params,
       }
     }
   }
@@ -165,7 +165,7 @@ define duplicacy::repository (
   # Tidy any logs created by the jobs running on this system.
   tidy { "${pref_dir}/puppet/logs":
     age     => $log_retention,
-    require => File["${pref_dir}/puppet/logs"]
+    require => File["${pref_dir}/puppet/logs"],
   }
 
   # Schedule Backups
@@ -176,7 +176,7 @@ define duplicacy::repository (
         repo_path => $repo_path,
         user      => $user,
         *         => $schedule,
-        require   => Duplicacy::Storage["${repo_id}_${storage_name}"]
+        require   => Duplicacy::Storage["${repo_id}_${storage_name}"],
       }
     }
   }

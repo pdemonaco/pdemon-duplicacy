@@ -133,9 +133,9 @@ describe 'duplicacy::storage' do
     # Validate the command
     it {
       is_expected.to contain_exec('add_my-repo_other_bucket').with(
-        'command' => %r{duplicacy add other_bucket my-repo b2://no-params},
-        'cwd' => '/my/super/safe/data',
-        'path' => '/usr/local/bin:/usr/bin:/bin',
+        command: %r{duplicacy add other_bucket my-repo b2://no-params > /my/super/safe/data/.duplicacy/puppet/logs/my-repo_init.log},
+        cwd: '/my/super/safe/data',
+        path: '/usr/local/bin:/usr/bin:/bin',
       )
     }
 
@@ -198,7 +198,7 @@ export DUPLICACY_OTHER_BUCKET_B2_KEY="my-app-key"
     # Validate the command
     it {
       is_expected.to contain_exec('init_my-repo').with(
-        command: %r{duplicacy init -e my-repo b2://test-storage},
+        command: %r{duplicacy init -e my-repo b2://test-storage > /my/super/safe/data/.duplicacy/puppet/logs/my-repo_init.log},
         cwd: '/my/super/safe/data',
       )
     }
@@ -265,7 +265,7 @@ export DUPLICACY_PASSWORD="secret-sauce"
     # Validate the command
     it {
       is_expected.to contain_exec('init_my-repo').with(
-        command: %r{duplicacy init -e -iterations 32768 -c 4194304 -max 16777216 -min 1048576 my-repo b2://test-storage},
+        command: %r{duplicacy init -e -iterations 32768 -c 4194304 -max 16777216 -min 1048576 my-repo b2://test-storage > /my/super/safe/data/.duplicacy/puppet/logs/my-repo_init.log},
         cwd: '/my/super/safe/data',
         path: '/usr/local/bin:/usr/bin:/bin',
         environment: [
@@ -306,7 +306,7 @@ export DUPLICACY_PASSWORD="secret-sauce"
     # Validate the command
     it {
       is_expected.to contain_exec('init_my-repo').with(
-        command: %r{duplicacy init -e -c 8388608 -max 33554432 -min 2097152 my-repo b2://test-storage},
+        command: %r{duplicacy init -e -c 8388608 -max 33554432 -min 2097152 my-repo b2://test-storage > /my/super/safe/data/.duplicacy/puppet/logs/my-repo_init.log},
         cwd: '/my/super/safe/data',
         path: '/usr/local/bin:/usr/bin:/bin',
         environment: [
