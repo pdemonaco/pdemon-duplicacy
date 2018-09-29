@@ -24,6 +24,29 @@ describe 'duplicacy::storage' do
     it { is_expected.to raise_error(Puppet::PreformattedError, %r{Password mandatory when encryption is enabled!}) }
   end
 
+  # Test that unsupported characters cause an error
+  context 'valid using default values' do
+    let(:title) { 'my-repo_default' }
+    let(:params) do
+      {
+        'storage_name' => 'default',
+        'repo_id' => 'my-repo',
+        'repo_path' => '/my/super/safe/data',
+        'user' => 'me',
+        'target' => {
+          'url' => 'b2://test-storage',
+          'b2_id' => 'this-is-my-accound-id',
+          'b2_app_key' => 'this-is-my-key',
+        },
+        'encryption' => {
+          'password' => 'secret\'-\'sauce',
+        },
+      }
+    end
+
+    it { is_expected.to raise_error(Puppet::PreformattedError, %r{Password includes unsupported character '}) }
+  end
+
   # Test target not specified
   context 'missing target' do
     let(:title) { 'other_bucket' }
@@ -140,6 +163,10 @@ describe 'duplicacy::storage' do
     #{params['repo_path']}/#{log_dir}/my-repo_init.log},
         cwd: params['repo_path'],
         path: '/usr/local/bin:/usr/bin:/bin',
+        environment: [
+          "DUPLICACY_OTHER_BUCKET_B2_ID=#{params['target']['b2_id']}",
+          "DUPLICACY_OTHER_BUCKET_B2_KEY=#{params['target']['b2_app_key']}",
+        ],
       )
     }
 
@@ -204,6 +231,11 @@ export DUPLICACY_OTHER_BUCKET_B2_KEY="my-app-key"
         command: %r{#{base_command} my-repo b2://test-storage > \
     #{params['repo_path']}/#{log_dir}/my-repo_init.log},
         cwd: params['repo_path'],
+        environment: [
+          "DUPLICACY_PASSWORD=#{params['encryption']['password']}",
+          "DUPLICACY_B2_ID=#{params['target']['b2_id']}",
+          "DUPLICACY_B2_KEY=#{params['target']['b2_app_key']}",
+        ],
       )
     }
 
@@ -265,6 +297,11 @@ export DUPLICACY_PASSWORD="secret-sauce"
     #{params['repo_path']}/#{log_dir}/#{params['repo_id']}_init.log",
         cwd: params['repo_path'],
         path: '/usr/local/bin:/usr/bin:/bin',
+        environment: [
+          "DUPLICACY_PASSWORD=#{params['encryption']['password']}",
+          "DUPLICACY_B2_ID=#{params['target']['b2_id']}",
+          "DUPLICACY_B2_KEY=#{params['target']['b2_app_key']}",
+        ],
       )
     }
   end
@@ -305,6 +342,11 @@ export DUPLICACY_PASSWORD="secret-sauce"
     #{params['repo_path']}/#{log_dir}/my-repo_init.log",
         cwd: params['repo_path'],
         path: '/usr/local/bin:/usr/bin:/bin',
+        environment: [
+          "DUPLICACY_PASSWORD=#{params['encryption']['password']}",
+          "DUPLICACY_B2_ID=#{params['target']['b2_id']}",
+          "DUPLICACY_B2_KEY=#{params['target']['b2_app_key']}",
+        ],
       )
     }
   end

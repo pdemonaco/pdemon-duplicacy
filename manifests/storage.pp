@@ -87,8 +87,11 @@ define duplicacy::storage (
     if 'password' in $encryption {
       $password = $encryption['password']
       $env_encryption = [ "${env_prefix}_PASSWORD=${password}" ]
+      if $password =~ /(["'])/ {
+        fail("Storage '${storage_name}': Password includes unsupported character ${1}")
+      }
     } else {
-      fail('Password mandatory when encryption is enabled!')
+      fail("Storage '${storage_name}': Password mandatory when encryption is enabled!")
     }
 
     if 'iterations' in $encryption {
