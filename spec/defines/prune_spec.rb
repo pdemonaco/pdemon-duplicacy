@@ -208,7 +208,7 @@ rm "${LOCK_FILE}"
     it { is_expected.to compile.with_all_deps }
 
     # Check for the mail block
-    it { 
+    it {
       is_expected.to contain_file("prune-script_#{title}").with_content(
         %r!# Notify someone about what happened
 RC="[$][?]"
@@ -243,7 +243,7 @@ case "[$]{RC}" in
     MESSAGE="Return code - [$]{RC}[.] See attached log[.]"
     ;;
 esac
-echo "[$]{MESSAGE}" [|] mutt -s "Duplicacy Prune [$]{JOB_NAME} - [$]{STATUS}" user@example[.]com -a "[$]{LOG_FILE}"$!m
+echo "[$]{MESSAGE}" [|] mutt -s "Duplicacy Prune [$]{JOB_NAME} - [$]{STATUS}" user@example[.]com -a "[$]{LOG_FILE}"$!m,
       )
     }
   end
