@@ -122,6 +122,7 @@ define duplicacy::repository (
             Variant[
               String,
               Integer,
+              Array,
             ],
           ],
         ],
@@ -142,6 +143,7 @@ define duplicacy::repository (
             Variant[
               String,
               Integer,
+              Array,
             ],
           ],
           Array[

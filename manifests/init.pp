@@ -110,6 +110,7 @@ class duplicacy (
                 Variant[
                   String,
                   Integer,
+                  Array,
                 ]
               ]
             ]
@@ -128,6 +129,7 @@ class duplicacy (
                 Variant[
                   String,
                   Integer,
+                  Array,
                 ],
               ],
               Array[Hash[String, Integer]],
