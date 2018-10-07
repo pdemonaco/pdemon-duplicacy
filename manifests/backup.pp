@@ -78,7 +78,7 @@ define duplicacy::backup (
   String $storage_name = undef,
   String $repo_path = undef,
   String $user = undef,
-  Hash[String, Variant[String, Integer]] $cron_entry = {},
+  Hash[String, Variant[String, Integer, Array]] $cron_entry = {},
   Optional[String] $pref_dir = "${repo_path}/.duplicacy",
   Optional[String] $backup_tag = undef,
   Optional[Integer] $threads = 1,
