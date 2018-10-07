@@ -11,6 +11,7 @@
 
 * [`duplicacy::backup`](#duplicacybackup): Generates a script & schedules it given the specified parameters
 * [`duplicacy::filter`](#duplicacyfilter): Creates a filters file for this repository.
+* [`duplicacy::prune`](#duplicacyprune): Generates a script & schedules it given the specified parameters
 * [`duplicacy::repository`](#duplicacyrepository): A short summary of the purpose of this defined type.
 * [`duplicacy::storage`](#duplicacystorage): This initializes a storage backend for a particular duplicacy repository.
 
@@ -53,6 +54,30 @@ duplicacy {
           'email_recipient' => phil@demona.co,
         },
       },
+      prune_schedules  => {
+        daily-0000     => {
+          storage_name => default,
+          cron_entry   => {
+            hour       => '0',
+          },
+          keep_ranges     => {
+            {
+              interval => 0,
+              max_age  => 90,
+            },
+            {
+              interval => 7,
+              max_age  => 30,
+            },
+            {
+              interval => 1,
+              max_age  => 7,
+            },
+          },
+          threads         => 6,
+          email_recipient => 'phil@demona.co',
+        },
+      },
     },
   },
 }
@@ -83,15 +108,18 @@ each repo must be defined in the `repos` parameter.
 
 ##### `repos`
 
-Data type: `Hash[String,
-    Hash[String,
+Data type: `Hash[
+    String,
+    Hash[
+      String,
       Variant[
         String,
         Array[String],
         Hash[String,
           Variant[
             String,
-            Hash[String,
+            Hash[
+              String,
               Variant[
                 String,
                 Integer,
@@ -99,12 +127,15 @@ Data type: `Hash[String,
             ]
           ]
         ],
-        Hash[String,
-          Hash[String,
+        Hash[
+          String,
+          Hash[
+            String,
             Variant[
               String,
               Integer,
-              Hash[String,
+              Hash[
+                String,
                 Variant[
                   String,
                   Integer,
@@ -112,6 +143,25 @@ Data type: `Hash[String,
               ]
             ]
           ]
+        ],
+        Hash[
+          String,
+          Hash[
+            String,
+            Variant[
+              String,
+              Integer,
+              Boolean,
+              Hash[
+                String,
+                Variant[
+                  String,
+                  Integer,
+                ],
+              ],
+              Array[Hash[String, Integer]],
+            ],
+          ],
         ]
       ]
     ]
@@ -317,6 +367,158 @@ page for more detail.
 
 Default value: []
 
+### duplicacy::prune
+
+This define handles the creation of a single backup schedule for the target
+repository / storage combination. The schedule is carried out via a cron
+object and a script which is stored in the $pref_dir/puppet/scripts/
+
+#### Examples
+
+##### Full configuration for a given backup job.
+
+```puppet
+duplicacy::prune { 'my-repo_weekly':
+  storage_name => 'default',
+  repo_path    => '/backup/dir',
+  pref_dir     => '/backup/dir/.duplicacy',
+  user         => 'root',
+  cron_entry   => {
+    hour       => '0',
+    weekday    => '0',
+  },
+  keep_ranges     => [
+    { interval => 0, min_age => 365 },
+    { interval => 30, min_age => 180 },
+    { interval => 7, min_age => 30 },
+    { interval => 1, min_age => 7 },
+  ],
+  backup_tags     => [
+    'daily',
+    'weekly',
+    'test',
+  ],
+  threads         => 4,
+  email_recipient => 'me@example.com',
+}
+```
+
+##### Minimal configuration
+
+```puppet
+duplicacy::backup { 'my-repo_minimal':
+  storage_name => 'default',
+  repo_path    => '/backup/dir',
+  pref_dir     => '/backup/dir/.duplicacy',
+  user         => 'root',
+  keep_ranges  => [
+    { interval => 0, min_age => 90 },
+  cron_entry   => {
+    hour       => '0',
+  },
+}
+```
+
+#### Parameters
+
+The following parameters are available in the `duplicacy::prune` defined type.
+
+##### `storage_name`
+
+Data type: `String`
+
+Name of this particular storage backend as referenced by duplicacy for this
+specific repository. Note that the backend named 'default' is the primary.
+
+Default value: `undef`
+
+##### `repo_path`
+
+Data type: `String`
+
+Directory in which this particular repository resides on this machine.
+
+Default value: `undef`
+
+##### `user`
+
+Data type: `String`
+
+User to whom this repository belongs.
+
+Default value: `undef`
+
+##### `pref_dir`
+
+Data type: `String`
+
+Directory containing the duplicacy preferences for this repository.
+Typically this is `${repo_path}/.duplicacy` however the application can
+support alternate paths.
+
+Default value: "${repo_path}/.duplicacy"
+
+##### `cron_entry`
+
+Data type: `Hash[String, Variant[String, Integer]]`
+
+This parameter is used as an argument to the cron resource type, however,
+several parameters are overridden directly. In particular, `user` and
+`command` cannot be specified via remote arguments. For more detail see the
+[puppet cron resource documentation](https://puppet.com/docs/puppet/5.5/types/cron.html).
+
+Default value: {}
+
+##### `backup_tags`
+
+Data type: `Optional[Array[String]]`
+
+Limit the prune to impact only backups matching the specified tag or tags.
+
+Default value: []
+
+##### `keep_ranges`
+
+Data type: `Array[Hash[String, Integer]]`
+
+An ordered list of hashes where each hash contains two values:
+* `interval` - 1 snapshot will be kept for each interval of this length in days
+* `min_age` - policy applies to snapshots at least this number of days old
+
+These **must** be sorted by their M values in decreasing order - the module
+doesn't do this for you at the moment!
+
+Default value: []
+
+##### `exhaustive`
+
+Data type: `Boolean`
+
+If this is enabled prune will remove unreferenced chunks created by other
+scenarios as well as files which don't appear to be backup chunks.
+
+Default value: `false`
+
+##### `threads`
+
+Data type: `Optional[Integer]`
+
+Number of parallel execution threads which will be spawned for this backup.
+Note that this defaults to 1 and should not be greater than the number of
+available threads on the target machine.
+
+Default value: 1
+
+##### `email_recipient`
+
+Data type: `Optional[String]`
+
+If specified, the job log will be sent to the specified address.
+
+@note This assumes email is configured and working on this system.
+
+Default value: `undef`
+
 ### duplicacy::repository
 
 A description of what this defined type does
@@ -346,8 +548,8 @@ duplicacy::repository { 'my-repo':
         min            => 2097152,
     },
   },
-  backup_schedules => [
-    {
+  backup_schedules => {
+    tri-weekly-0700 => {
       storage_name => default,
       cron_entry   => {
         hour       => '7',
@@ -358,8 +560,32 @@ duplicacy::repository { 'my-repo':
       hash_mode       => true,
       email_recipient => 'batman@batcave.com',
     },
-  ],
-  log_retention    => '5d'
+  },
+  prune_schedules  => {
+    daily-0000     => {
+      storage_name => default,
+      cron_entry   => {
+        hour       => '0',
+      },
+      keep_ranges     => {
+        {
+          interval => 0,
+          max_age  => 90,
+        },
+        {
+          interval => 7,
+          max_age  => 30,
+        },
+        {
+          interval => 1,
+          max_age  => 7,
+        },
+      },
+      threads         => 6,
+      email_recipient => 'batman@batcave.com',
+    },
+  },
+  log_retention   => '5d'
 }
 ```
 
@@ -407,12 +633,64 @@ Default value: {}
 
 ##### `backup_schedules`
 
-Data type: `Optional[Hash[String, Hash[String, Variant[String, Integer, Hash[String, Variant[String, Integer]]]]]]`
+Data type: `Optional[
+    Hash[
+      String,
+      Hash[
+        String,
+        Variant[
+          String,
+          Integer,
+          Hash[
+            String,
+            Variant[
+              String,
+              Integer,
+            ],
+          ],
+        ],
+      ],
+    ]
+  ]`
 
 Optional[Hash[String, Hash[String, Variant[String, Integer, Hash[String, Variant[String, Integer]]]]]]
 A list of parameters and schedules for the execution of a series of backups
 of this repository. If no schedules are provided this machine will not
 backup this repository.
+
+@note The following parameters must not be specified: `user`, `repo_path`
+
+Default value: {}
+
+##### `prune_schedules`
+
+Data type: `Optional[
+    Hash[
+      String,
+      Hash[
+        String,
+        Variant[
+          String,
+          Integer,
+          Boolean,
+          Hash[
+            String,
+            Variant[
+              String,
+              Integer,
+            ],
+          ],
+          Array[
+            Hash[String, Integer]
+          ],
+        ],
+      ],
+    ]
+  ]`
+
+A list of parameters and schedules for the execution of a series of prunes
+of this repository. If no schedules are provided this machine will not
+prune this repository.
 
 @note The following parameters must not be specified: `user`, `repo_path`
 

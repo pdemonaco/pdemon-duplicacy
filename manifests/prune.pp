@@ -52,7 +52,7 @@
 # @param user [String]
 #   User to whom this repository belongs.
 #
-# @param pref_dir [Optional[String]]
+# @param pref_dir [String]
 #   Directory containing the duplicacy preferences for this repository.
 #   Typically this is `${repo_path}/.duplicacy` however the application can
 #   support alternate paths.
@@ -66,7 +66,7 @@
 # @param backup_tags [Optional[Array[String]]]
 #   Limit the prune to impact only backups matching the specified tag or tags.
 #
-# @param keep_ranges [Optional[Array[String]]]
+# @param keep_ranges [Array[Hash[String, Integer]]]
 #   An ordered list of hashes where each hash contains two values:
 #   * `interval` - 1 snapshot will be kept for each interval of this length in days
 #   * `min_age` - policy applies to snapshots at least this number of days old
