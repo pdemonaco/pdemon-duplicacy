@@ -244,7 +244,7 @@ define duplicacy::repository (
   unless(empty($backup_schedules)) {
     $backup_schedules.each | $title, $schedule | {
       $storage_name = $schedule['storage_name']
-      duplicacy::backup { "${repo_id}_${storage_name}_backup_${title}":
+      duplicacy::backup { "${repo_id}_${storage_name}_${title}":
         repo_path => $repo_path,
         user      => $user,
         *         => $schedule,

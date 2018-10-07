@@ -25,7 +25,7 @@ SCRIPT_DIR="${PUPPET_DIR}/scripts"
 # Config files
 LOCK_FILE="${LOCK_DIR}/${STORAGE_NAME}.lock"
 ENV_FILE="${SCRIPT_DIR}/${STORAGE_NAME}.env"
-LOG_FILE="${LOG_DIR}/${JOB_NAME}_${STORAGE_NAME}_${TIMESTAMP}.log"
+LOG_FILE="${LOG_DIR}/${STORAGE_NAME}_prune_${JOB_NAME}_${TIMESTAMP}.log"
 
 #==== Check for locks and aquire
 acquire_backup_lock()

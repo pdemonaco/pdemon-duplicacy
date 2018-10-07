@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe 'duplicacy::backup' do
-  let(:title) { 'my-repo_default_backup_daily-0130' }
+  let(:title) { 'my-repo_default_daily-0130' }
 
   context 'Invaild email' do
     let(:params) do
@@ -49,19 +49,19 @@ describe 'duplicacy::backup' do
 
     # Check the cron entry
     it {
-      is_expected.to contain_cron('backup-cron_my-repo_default_backup_daily-0130').with(
+      is_expected.to contain_cron('backup-cron_my-repo_default_daily-0130').with(
         'ensure' => 'present',
-        'command' => '/backup/dir/.duplicacy/puppet/scripts/backup_my-repo_default_backup_daily-0130.sh',
+        'command' => '/backup/dir/.duplicacy/puppet/scripts/backup_my-repo_default_daily-0130.sh',
         'user' => 'root',
         'hour' => '0',
-      ).that_requires('File[backup-script_my-repo_default_backup_daily-0130]')
+      ).that_requires('File[backup-script_my-repo_default_daily-0130]')
     }
 
     # Check the basic parameters of the file
     it {
-      is_expected.to contain_file('backup-script_my-repo_default_backup_daily-0130').with(
+      is_expected.to contain_file('backup-script_my-repo_default_daily-0130').with(
         'ensure' => 'file',
-        'path' => '/backup/dir/.duplicacy/puppet/scripts/backup_my-repo_default_backup_daily-0130.sh',
+        'path' => '/backup/dir/.duplicacy/puppet/scripts/backup_my-repo_default_daily-0130.sh',
         'owner' => 'root',
         'group' => 'root',
         'mode' => '0700',
@@ -70,13 +70,13 @@ describe 'duplicacy::backup' do
 
     # Check the content
     it {
-      is_expected.to contain_file('backup-script_my-repo_default_backup_daily-0130').with_content(
+      is_expected.to contain_file('backup-script_my-repo_default_daily-0130').with_content(
         [
           '#!/bin/sh
 #==== Constants
 PATH="/usr/local/bin:/usr/bin:/bin"
 STORAGE_NAME="default"
-BACKUP_NAME="my-repo_default_backup_daily-0130"
+JOB_NAME="my-repo_default_daily-0130"
 TIMESTAMP=$(date +%Y-%m-%d_%H%M%S)
 
 # Paths
@@ -87,9 +87,9 @@ LOG_DIR="${PUPPET_DIR}/logs"
 SCRIPT_DIR="${PUPPET_DIR}/scripts"
 
 # Config files
-LOCK_FILE="${LOCK_DIR}/default.lock"
+LOCK_FILE="${LOCK_DIR}/${STORAGE_NAME}.lock"
 ENV_FILE="${SCRIPT_DIR}/${STORAGE_NAME}.env"
-LOG_FILE="${LOG_DIR}/${BACKUP_NAME}_${STORAGE_NAME}_${TIMESTAMP}.log"
+LOG_FILE="${LOG_DIR}/${STORAGE_NAME}_backup_${JOB_NAME}_${TIMESTAMP}.log"
 
 #==== Check for locks and aquire
 acquire_backup_lock()
@@ -101,7 +101,7 @@ acquire_backup_lock()
     exit 1
   # Otherwise capture backup name & PID
   else
-    echo "${BACKUP_NAME}: $$" > "${LOCK_FILE}"
+    echo "${JOB_NAME}: $$" > "${LOCK_FILE}"
   fi
 }
 
@@ -146,9 +146,9 @@ rm "${LOCK_FILE}"
 
     # Check the basic parameters of the file
     it {
-      is_expected.to contain_file('backup-script_my-repo_default_backup_daily-0130').with(
+      is_expected.to contain_file('backup-script_my-repo_default_daily-0130').with(
         'ensure' => 'file',
-        'path' => '/backup/dir/.duplicacy/puppet/scripts/backup_my-repo_default_backup_daily-0130.sh',
+        'path' => '/backup/dir/.duplicacy/puppet/scripts/backup_my-repo_default_daily-0130.sh',
         'owner' => 'root',
         'group' => 'root',
         'mode' => '0700',
@@ -157,7 +157,7 @@ rm "${LOCK_FILE}"
 
     # Check for the mail block
     it {
-      is_expected.to contain_file('backup-script_my-repo_default_backup_daily-0130').with_content(
+      is_expected.to contain_file('backup-script_my-repo_default_daily-0130').with_content(
         %r!# Notify someone about what happened
 RC="[$][?]"
 MESSAGE=""
@@ -191,7 +191,7 @@ case "[$]{RC}" in
     MESSAGE="Return code - [$]{RC}[.] See attached log[.]"
     ;;
 esac
-echo "[$]{MESSAGE}" [|] mutt -s "Duplicacy Backup [$]{BACKUP_NAME} - [$]{STATUS}" user@example[.]com -a "[$]{LOG_FILE}"$!m,
+echo "[$]{MESSAGE}" [|] mutt -s "Duplicacy Backup [$]{JOB_NAME} - [$]{STATUS}" user@example[.]com -a "[$]{LOG_FILE}"$!m,
       )
     }
   end
@@ -215,7 +215,7 @@ echo "[$]{MESSAGE}" [|] mutt -s "Duplicacy Backup [$]{BACKUP_NAME} - [$]{STATUS}
 
     # Validate the backup command
     it {
-      is_expected.to contain_file('backup-script_my-repo_default_backup_daily-0130').with_content(
+      is_expected.to contain_file('backup-script_my-repo_default_daily-0130').with_content(
         %r!duplicacy -log -background backup \\\n  -hash \\\n  -threads 8 >"[$]{LOG_FILE}" 2>&1!m,
       )
     }
@@ -240,7 +240,7 @@ echo "[$]{MESSAGE}" [|] mutt -s "Duplicacy Backup [$]{BACKUP_NAME} - [$]{STATUS}
 
     # Validate the backup command
     it {
-      is_expected.to contain_file('backup-script_my-repo_default_backup_daily-0130').with_content(
+      is_expected.to contain_file('backup-script_my-repo_default_daily-0130').with_content(
         %r!duplicacy -log -background backup \\\n  -limit-rate 512 \\\n  -threads 6 >"[$]{LOG_FILE}" 2>&1!m,
       )
     }
@@ -265,7 +265,7 @@ echo "[$]{MESSAGE}" [|] mutt -s "Duplicacy Backup [$]{BACKUP_NAME} - [$]{STATUS}
 
     # Validate the backup command
     it {
-      is_expected.to contain_file('backup-script_my-repo_default_backup_daily-0130').with_content(
+      is_expected.to contain_file('backup-script_my-repo_default_daily-0130').with_content(
         %r!duplicacy -log -background backup \\\n  -t daily-0000 \\\n  -threads 4 >"[$]{LOG_FILE}" 2>&1!m,
       )
     }
@@ -292,7 +292,7 @@ echo "[$]{MESSAGE}" [|] mutt -s "Duplicacy Backup [$]{BACKUP_NAME} - [$]{STATUS}
 
     # Validate the backup command
     it {
-      is_expected.to contain_file('backup-script_my-repo_default_backup_daily-0130').with_content(
+      is_expected.to contain_file('backup-script_my-repo_default_daily-0130').with_content(
         %r!duplicacy -log -background backup \\\n  -hash \\\n  -limit-rate 1024 \\\n  -storage other_bucket \\\n  -t daily-0000 \\\n  -threads 4 >"[$]{LOG_FILE}" 2>&1!m,
       )
     }

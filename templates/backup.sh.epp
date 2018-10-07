@@ -12,7 +12,7 @@
 #==== Constants
 PATH="/usr/local/bin:/usr/bin:/bin"
 STORAGE_NAME="<%= $storage_name %>"
-BACKUP_NAME="<%= $backup_name %>"
+JOB_NAME="<%= $backup_name %>"
 TIMESTAMP=$(date +%Y-%m-%d_%H%M%S)
 
 # Paths
@@ -23,9 +23,9 @@ LOG_DIR="${PUPPET_DIR}/logs"
 SCRIPT_DIR="${PUPPET_DIR}/scripts"
 
 # Config files
-LOCK_FILE="${LOCK_DIR}/<%= $storage_name %>.lock"
+LOCK_FILE="${LOCK_DIR}/${STORAGE_NAME}.lock"
 ENV_FILE="${SCRIPT_DIR}/${STORAGE_NAME}.env"
-LOG_FILE="${LOG_DIR}/${BACKUP_NAME}_${STORAGE_NAME}_${TIMESTAMP}.log"
+LOG_FILE="${LOG_DIR}/${STORAGE_NAME}_backup_${JOB_NAME}_${TIMESTAMP}.log"
 
 #==== Check for locks and aquire
 acquire_backup_lock()
@@ -37,7 +37,7 @@ acquire_backup_lock()
     exit 1
   # Otherwise capture backup name & PID
   else
-    echo "${BACKUP_NAME}: $$" > "${LOCK_FILE}"
+    echo "${JOB_NAME}: $$" > "${LOCK_FILE}"
   fi
 }
 
@@ -102,7 +102,7 @@ case "${RC}" in
     MESSAGE="Return code - ${RC}. See attached log."
     ;;
 esac
-echo "${MESSAGE}" | mutt -s "Duplicacy Backup ${BACKUP_NAME} - ${STATUS}" <%= $email_recipient %> -a "${LOG_FILE}"
+echo "${MESSAGE}" | mutt -s "Duplicacy Backup ${JOB_NAME} - ${STATUS}" <%= $email_recipient %> -a "${LOG_FILE}"
 <% } -%>
 
 # Release the lock

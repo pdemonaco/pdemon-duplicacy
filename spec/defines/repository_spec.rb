@@ -257,7 +257,7 @@ describe 'duplicacy::repository' do
 
     # Ensure that the schedule is created
     it {
-      is_expected.to contain_duplicacy__backup('my-repo_default_backup_daily-0130').with(
+      is_expected.to contain_duplicacy__backup('my-repo_default_daily-0130').with(
         'repo_path' => '/my/backup/dir',
         'user' => 'root',
         'threads' => 8,
