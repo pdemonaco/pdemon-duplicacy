@@ -194,7 +194,7 @@ describe 'duplicacy::repository' do
   end
 
   # One valid storage with a backup schedule
-  context 'single valid storage with backups' do
+  context 'single valid storage with backups and prunes' do
     let(:params) do
       {
         'repo_path' => '/my/backup/dir',
@@ -225,6 +225,31 @@ describe 'duplicacy::repository' do
             'email_recipient' => 'me@example.com',
           },
         },
+        'prune_schedules' => {
+          'daily-0000' => {
+            'storage_name' => 'default',
+            'cron_entry' => {
+              'hour' => '0',
+              'minute' => '0',
+            },
+            'keep_ranges' => [
+              {
+                'interval' => 0,
+                'min_age' => 90,
+              },
+              {
+                'interval' => 7,
+                'min_age' => 30,
+              },
+              {
+                'interval' => 1,
+                'min_age' => 7,
+              },
+            ],
+            'threads' => 8,
+            'email_recipient' => 'me@example.com',
+          },
+        },
       }
     end
 
@@ -238,6 +263,13 @@ describe 'duplicacy::repository' do
         'threads' => 8,
         'email_recipient' => 'me@example.com',
       ).that_requires('Duplicacy::Storage[my-repo_default]')
+
+      is_expected.to contain_duplicacy__prune("#{title}_default_daily-0000").with(
+        repo_path: params['repo_path'],
+        user: 'root',
+        threads: 8,
+        email_recipient: 'me@example.com',
+      )
     }
   end
 end

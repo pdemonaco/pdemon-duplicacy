@@ -32,6 +32,30 @@
 #             'email_recipient' => phil@demona.co,
 #           },
 #         },
+#         prune_schedules  => {
+#           daily-0000     => {
+#             storage_name => default,
+#             cron_entry   => {
+#               hour       => '0',
+#             },
+#             keep_ranges     => {
+#               { 
+#                 interval => 0,
+#                 max_age  => 90,
+#               },
+#               { 
+#                 interval => 7,
+#                 max_age  => 30,
+#               },
+#               { 
+#                 interval => 1,
+#                 max_age  => 7,
+#               },
+#             },
+#             threads         => 6,
+#             email_recipient => 'phil@demona.co',
+#           },
+#         },
 #       },
 #     },
 #   }
@@ -54,15 +78,18 @@ class duplicacy (
   Array[String] $package_name,
   Array[String] $mail_package_name,
   Array[String] $local_repos,
-  Hash[String,
-    Hash[String,
+  Hash[
+    String,
+    Hash[
+      String,
       Variant[
         String,
         Array[String],
         Hash[String,
           Variant[
             String,
-            Hash[String,
+            Hash[
+              String,
               Variant[
                 String,
                 Integer,
@@ -70,12 +97,15 @@ class duplicacy (
             ]
           ]
         ],
-        Hash[String,
-          Hash[String,
+        Hash[
+          String,
+          Hash[
+            String,
             Variant[
               String,
               Integer,
-              Hash[String,
+              Hash[
+                String,
                 Variant[
                   String,
                   Integer,
@@ -83,6 +113,25 @@ class duplicacy (
               ]
             ]
           ]
+        ],
+        Hash[
+          String,
+          Hash[
+            String,
+            Variant[
+              String,
+              Integer,
+              Boolean,
+              Hash[
+                String,
+                Variant[
+                  String,
+                  Integer,
+                ],
+              ],
+              Array[Hash[String, Integer]],
+            ],
+          ],
         ]
       ]
     ]

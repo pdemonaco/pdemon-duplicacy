@@ -5,17 +5,27 @@
 # @summary Generates a script & schedules it given the specified parameters
 #
 # @example Full configuration for a given backup job.
-#   duplicacy::backup { 'my-repo_daily': 
+#   duplicacy::prune { 'my-repo_weekly': 
 #     storage_name => 'default',
 #     repo_path    => '/backup/dir',
 #     pref_dir     => '/backup/dir/.duplicacy',
 #     user         => 'root',
 #     cron_entry   => {
-#       hour       => '1',
+#       hour       => '0',
+#       weekday    => '0',
 #     },
-#     backup_tag      => 'daily',
+#     keep_ranges     => [
+#       { interval => 0, min_age => 365 },
+#       { interval => 30, min_age => 180 },
+#       { interval => 7, min_age => 30 },
+#       { interval => 1, min_age => 7 },
+#     ],
+#     backup_tags     => [
+#       'daily',
+#       'weekly',
+#       'test',
+#     ],
 #     threads         => 4,
-#     hash_mode       => true,
 #     email_recipient => 'me@example.com',
 #   }
 #
@@ -25,8 +35,10 @@
 #     repo_path    => '/backup/dir',
 #     pref_dir     => '/backup/dir/.duplicacy',
 #     user         => 'root',
+#     keep_ranges  => [
+#       { interval => 0, min_age => 90 },
 #     cron_entry   => {
-#       hour       => '*/6',
+#       hour       => '0',
 #     },
 #   }
 #
@@ -51,40 +63,41 @@
 #   `command` cannot be specified via remote arguments. For more detail see the
 #   [puppet cron resource documentation](https://puppet.com/docs/puppet/5.5/types/cron.html).
 # 
-# @param backup_tag [Optional[String]]
-#   This string will be set as the tag argument for each backup performed by
-#   this job. These can be used by various duplicacy commands to filter to
-#   specific snapshots.
+# @param backup_tags [Optional[Array[String]]]
+#   Limit the prune to impact only backups matching the specified tag or tags.
+#
+# @param keep_ranges [Optional[Array[String]]]
+#   An ordered list of hashes where each hash contains two values:
+#   * `interval` - 1 snapshot will be kept for each interval of this length in days
+#   * `min_age` - policy applies to snapshots at least this number of days old
+#
+#   These **must** be sorted by their M values in decreasing order - the module
+#   doesn't do this for you at the moment!
+#
+# @param exhaustive [Boolean]
+#   If this is enabled prune will remove unreferenced chunks created by other
+#   scenarios as well as files which don't appear to be backup chunks.
 #
 # @param threads [Optional[Integer]]
 #   Number of parallel execution threads which will be spawned for this backup.
 #   Note that this defaults to 1 and should not be greater than the number of
 #   available threads on the target machine.
 #
-# @param hash_mode [Optional[Boolean]]
-#   Indicates whether a hash should be generated for each file to determine
-#   whether a change has occured. The alternate approach simply uses file size
-#   and modification timestamp. Note that this defaults to `false`.
-#
-# @param limit_rate [Optional[Integer]]
-#   Maximum upload data rate in kilobytes per second (KB/s). Note that leaving
-#   this unset implies no limit.
-#
 # @param email_recipient [Optional[String]]
 #   If specified, the job log will be sent to the specified address.
 #
 #   @note This assumes email is configured and working on this system.
-define duplicacy::backup (
-  String $storage_name = undef,
-  String $repo_path = undef,
-  String $user = undef,
+define duplicacy::prune (
+  String $storage_name                               = undef,
+  String $repo_path                                  = undef,
+  String $user                                       = undef,
   Hash[String, Variant[String, Integer]] $cron_entry = {},
-  Optional[String] $pref_dir = "${repo_path}/.duplicacy",
-  Optional[String] $backup_tag = undef,
-  Optional[Integer] $threads = 1,
-  Optional[Boolean] $hash_mode = false,
-  Optional[Integer] $limit_rate = undef,
-  Optional[String] $email_recipient = undef,
+  Boolean $exhaustive                                = false,
+  String $pref_dir                                   = "${repo_path}/.duplicacy",
+  Array[Hash[String, Integer]] $keep_ranges          = [],
+  Optional[Array[String]] $backup_tags               = [],
+  Optional[Integer] $threads                         = 1,
+  Optional[String] $email_recipient                  = undef,
 ) {
 
   # Check if the mail recipient is valid
@@ -97,35 +110,43 @@ define duplicacy::backup (
     fail('A schedule entry must be specified in cron resource format!')
   }
 
+  # Ensure that some number of keep stanzas were specified!
+  if empty($keep_ranges) {
+    fail('At least one keep range must be specified!')
+  }
+
   # Arguments for the script file
   $epp_arguments = {
     'storage_name'    => $storage_name,
-    'backup_name'     => $name,
+    'job_name'        => $name,
     'repo_dir'        => $repo_path,
     'pref_dir'        => $pref_dir,
+    'exhaustive'      => $exhaustive,
+    'keep_ranges'     => $keep_ranges,
     'threads'         => $threads,
-    'hash_mode'       => $hash_mode,
-    'limit_rate'      => $limit_rate,
-    'backup_tag'      => $backup_tag,
+    'backup_tags'     => $backup_tags,
     'email_recipient' => $email_recipient,
   }
 
+  # Prune Script
+  $script_file = "${pref_dir}/puppet/scripts/prune_${name}.sh"
+
   # Generate the script file
-  file { "backup-script_${name}":
+  file { "prune-script_${name}":
     ensure  => file,
-    path    => "${pref_dir}/puppet/scripts/backup_${name}.sh",
+    path    => $script_file,
     owner   => $user,
     group   => $user,
     mode    => '0700',
-    content => epp('duplicacy/backup.sh.epp', $epp_arguments ),
+    content => epp('duplicacy/prune.sh.epp', $epp_arguments ),
   }
 
   # Add a cron entry for this user
-  cron { "backup-cron_${name}":
+  cron { "prune-cron_${name}":
     ensure  => present,
-    command => "${pref_dir}/puppet/scripts/backup_${name}.sh",
+    command => $script_file,
     user    => $user,
-    require => File["backup-script_${name}"],
+    require => File["prune-script_${name}"],
     *       => $cron_entry,
   }
 }

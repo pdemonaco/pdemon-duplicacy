@@ -52,6 +52,31 @@ describe 'duplicacy' do
               'email_recipient' => 'me@example.com',
             },
           },
+          'prune_schedules' => {
+            'daily-0000' => {
+              'storage_name' => 'default',
+              'cron_entry' => {
+                'hour' => '0',
+                'minute' => '0',
+              },
+              'keep_ranges' => [
+                {
+                  'interval' => 0,
+                  'min_age' => 90,
+                },
+                {
+                  'interval' => 7,
+                  'min_age' => 30,
+                },
+                {
+                  'interval' => 1,
+                  'min_age' => 7,
+                },
+              ],
+              'threads' => 8,
+              'email_recipient' => 'me@example.com',
+            },
+          },
         },
       },
     }

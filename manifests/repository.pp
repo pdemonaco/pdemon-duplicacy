@@ -23,8 +23,8 @@
 #           min            => 2097152,
 #       },
 #     },
-#     backup_schedules => [
-#       {
+#     backup_schedules => {
+#       tri-weekly-0700 => {
 #         storage_name => default,
 #         cron_entry   => {
 #           hour       => '7',
@@ -35,8 +35,32 @@
 #         hash_mode       => true,
 #         email_recipient => 'batman@batcave.com',
 #       },
-#     ],
-#     log_retention    => '5d'
+#     },
+#     prune_schedules  => {
+#       daily-0000     => {
+#         storage_name => default,
+#         cron_entry   => {
+#           hour       => '0',
+#         },
+#         keep_ranges     => {
+#           { 
+#             interval => 0,
+#             max_age  => 90,
+#           },
+#           { 
+#             interval => 7,
+#             max_age  => 30,
+#           },
+#           { 
+#             interval => 1,
+#             max_age  => 7,
+#           },
+#         },
+#         threads         => 6,
+#         email_recipient => 'batman@batcave.com',
+#       },
+#     },
+#     log_retention   => '5d'
 #   }
 #
 # @param repo_id [String]
@@ -64,6 +88,13 @@
 #
 #   @note The following parameters must not be specified: `user`, `repo_path`
 #
+# @param prune_schedules 
+#   A list of parameters and schedules for the execution of a series of prunes
+#   of this repository. If no schedules are provided this machine will not
+#   prune this repository.
+#
+#   @note The following parameters must not be specified: `user`, `repo_path`
+#
 # @param filter_rules [Optional[Array[String]]]
 #   An ordered list of valid include/exclude filters for duplicacy.
 #
@@ -77,7 +108,48 @@ define duplicacy::repository (
   String $repo_path = undef,
   String $user = 'root',
   Hash[String, Variant[String, Hash[String, Variant[String, Hash[String, Variant[String, Integer]]]]]] $storage_targets = {},
-  Optional[Hash[String, Hash[String, Variant[String, Integer, Hash[String, Variant[String, Integer]]]]]] $backup_schedules = {},
+  Optional[
+    Hash[
+      String,
+      Hash[
+        String,
+        Variant[
+          String,
+          Integer,
+          Hash[
+            String,
+            Variant[
+              String,
+              Integer,
+            ],
+          ],
+        ],
+      ],
+    ]
+  ] $backup_schedules = {},
+  Optional[
+    Hash[
+      String,
+      Hash[
+        String,
+        Variant[
+          String,
+          Integer,
+          Boolean,
+          Hash[
+            String,
+            Variant[
+              String,
+              Integer,
+            ],
+          ],
+          Array[
+            Hash[String, Integer]
+          ],
+        ],
+      ],
+    ]
+  ] $prune_schedules = {},
   Optional[Array[String]] $filter_rules = [],
   Optional[String] $log_retention = '4w',
 ) {
@@ -181,5 +253,16 @@ define duplicacy::repository (
     }
   }
 
-  # TODO - Schedule Prunes
+  # Schedule Prunes
+  unless(empty($prune_schedules)) {
+    $prune_schedules.each | $title, $schedule | {
+      $storage_name = $schedule['storage_name']
+      duplicacy::prune { "${repo_id}_${storage_name}_${title}":
+        repo_path => $repo_path,
+        user      => $user,
+        *         => $schedule,
+        require   => Duplicacy::Storage["${repo_id}_${storage_name}"],
+      }
+    }
+  }
 }
