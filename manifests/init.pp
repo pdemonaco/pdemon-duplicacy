@@ -104,6 +104,7 @@ class duplicacy (
             Variant[
               String,
               Integer,
+              Boolean,
               Hash[
                 String,
                 Variant[

@@ -116,6 +116,7 @@ define duplicacy::repository (
         Variant[
           String,
           Integer,
+          Boolean,
           Hash[
             String,
             Variant[
