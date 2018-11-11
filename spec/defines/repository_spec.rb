@@ -86,9 +86,9 @@ describe 'duplicacy::repository' do
 
     it { is_expected.to compile.with_all_deps }
 
-    # There should be 7 files: 5 directories created here, a file in the
-    # storage, and a file in the filters
-    it { is_expected.to have_file_resource_count(7) }
+    # There should be 8 files: 5 directories created here, a file in the
+    # storage, a file in the filters, and a script
+    it { is_expected.to have_file_resource_count(8) }
 
     # One directory should be the duplicacy folder
     it {
@@ -111,9 +111,23 @@ describe 'duplicacy::repository' do
     }
 
     # There should also be three subfolders of puppet: scripts, logs, locks
-    it { is_expected.to contain_file('/my/backup/dir/.duplicacy/puppet/scripts').that_requires('File[/my/backup/dir/.duplicacy/puppet]') }
-    it { is_expected.to contain_file('/my/backup/dir/.duplicacy/puppet/logs').that_requires('File[/my/backup/dir/.duplicacy/puppet]') }
-    it { is_expected.to contain_file('/my/backup/dir/.duplicacy/puppet/locks').that_requires('File[/my/backup/dir/.duplicacy/puppet]') }
+    it {
+      is_expected.to contain_file('/my/backup/dir/.duplicacy/puppet/scripts').that_requires('File[/my/backup/dir/.duplicacy/puppet]')
+      is_expected.to contain_file('/my/backup/dir/.duplicacy/puppet/logs').that_requires('File[/my/backup/dir/.duplicacy/puppet]')
+      is_expected.to contain_file('/my/backup/dir/.duplicacy/puppet/locks').that_requires('File[/my/backup/dir/.duplicacy/puppet]')
+    }
+
+    # We also should create the log summary script
+    it {
+      is_expected.to contain_file('/my/backup/dir/.duplicacy/puppet/scripts/log_summary.sh').with(
+        ensure: 'file',
+        mode: '0700',
+        owner: 'root',
+        group: 'root',
+        checksum: 'sha256',
+        checksum_value: 'd419e6cacd0e6d570a2635364834d3de32981e8998e554bf1651a05393d0f00d',
+      ).that_requires('File[/my/backup/dir/.duplicacy/puppet/scripts]')
+    }
 
     # The log directory should be cleaned up at some frequency
     it {

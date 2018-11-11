@@ -104,8 +104,8 @@ SCRIPT_DIR="${PUPPET_DIR}/scripts"
 
 # Config files
 LOCK_FILE="${LOCK_DIR}/${STORAGE_NAME}.lock"
-ENV_FILE="${SCRIPT_DIR}/${STORAGE_NAME}.env"
 LOG_FILE="${LOG_DIR}/${STORAGE_NAME}_prune_${JOB_NAME}_${TIMESTAMP}.log"
+LOG_PARSER="${SCRIPT_DIR}/log_summary.sh"
 
 #==== Check for locks and aquire
 acquire_backup_lock()
@@ -127,10 +127,10 @@ acquire_backup_lock()
 acquire_backup_lock
 
 # Retrieve our credentials
-source "${ENV_FILE}"
+. /backup/dir/.duplicacy/puppet/scripts/default.env
 
 # Move to the root of the repository
-cd "${REPO_DIR}"
+cd "${REPO_DIR}" || exit 1
 
 # Execute
 duplicacy -log -background prune \
@@ -216,7 +216,7 @@ MESSAGE=""
 case "[$]{RC}" in
   0\)
     STATUS="Success"
-    MESSAGE="See attached log"
+    MESSAGE=\$\("\${LOG_PARSER}" BACKUP "\${LOG_FILE}"\)
     ;;
   1\)
     STATUS="Failure"

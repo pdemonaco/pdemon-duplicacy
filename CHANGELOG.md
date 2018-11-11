@@ -2,10 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
-## Release 0.1.0
+## Release 0.1.0-rc3
 
 **Features**
+* Added a log summary function so enormous logs aren't emailed all the time
 
 **Bugfixes**
+* Fixed some potentially bad syntax in the backup and prune scripts.
 
 **Known Issues**

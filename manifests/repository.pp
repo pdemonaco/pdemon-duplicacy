@@ -197,6 +197,18 @@ define duplicacy::repository (
     ;
   }
 
+  # Create the log parsing script
+  file { "${pref_dir}/puppet/scripts/log_summary.sh":
+    ensure         => file,
+    mode           => '0700',
+    owner          => $user,
+    group          => $user,
+    checksum       => 'sha256',
+    checksum_value => 'd419e6cacd0e6d570a2635364834d3de32981e8998e554bf1651a05393d0f00d',
+    content        => file('duplicacy/log_summary.sh'),
+    require        => File["${pref_dir}/puppet/scripts"],
+  }
+
   # Initialize the default storage
   $default_params = $storage_targets['default']
   duplicacy::storage { "${repo_id}_default":

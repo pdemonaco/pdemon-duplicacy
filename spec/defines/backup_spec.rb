@@ -88,8 +88,8 @@ SCRIPT_DIR="${PUPPET_DIR}/scripts"
 
 # Config files
 LOCK_FILE="${LOCK_DIR}/${STORAGE_NAME}.lock"
-ENV_FILE="${SCRIPT_DIR}/${STORAGE_NAME}.env"
 LOG_FILE="${LOG_DIR}/${STORAGE_NAME}_backup_${JOB_NAME}_${TIMESTAMP}.log"
+LOG_PARSER="${SCRIPT_DIR}/log_summary.sh"
 
 #==== Check for locks and aquire
 acquire_backup_lock()
@@ -111,10 +111,10 @@ acquire_backup_lock()
 acquire_backup_lock
 
 # Retrieve our credentials
-source "${ENV_FILE}"
+. /backup/dir/.duplicacy/puppet/scripts/default.env
 
 # Move to the root of the repository
-cd "${REPO_DIR}"
+cd "${REPO_DIR}" || exit 1
 
 # Execute the backup
 duplicacy -log -background backup \
@@ -164,34 +164,48 @@ MESSAGE=""
 case "[$]{RC}" in
   0\)
     STATUS="Success"
-    MESSAGE="See attached log"
+    MESSAGE=[$]\("[$]{LOG_PARSER}" BACKUP "[$]{LOG_FILE}"\)
+    INCLUDE_LOG=false
     ;;
   1\)
     STATUS="Failure"
     MESSAGE="Interrupted by user[.] See attached log[.]"
+    INCLUDE_LOG=true
     ;;
   2\)
     STATUS="Failure"
     MESSAGE="Malformed arguments[.] See attached log[.]"
+    INCLUDE_LOG=true
     ;;
   3\)
     STATUS="Failure"
     MESSAGE="Invalid argument value[.] See attached log[.]"
+    INCLUDE_LOG=true
     ;;
   100\)
     STATUS="Failure"
     MESSAGE="Runtime error in Duplicacy code[.] See attached log[.]"
+    INCLUDE_LOG=true
     ;;
   101\)
     STATUS="Failure"
     MESSAGE="Runtime error in an external dependency[.] See attached log[.]"
+    INCLUDE_LOG=true
     ;;
   [*]\)
     STATUS="Unknown"
     MESSAGE="Return code - [$]{RC}[.] See attached log[.]"
+    INCLUDE_LOG=true
     ;;
 esac
-echo "[$]{MESSAGE}" [|] mutt -s "Duplicacy Backup [$]{JOB_NAME} - [$]{STATUS}" user@example[.]com -a "[$]{LOG_FILE}"$!m,
+
+if \[ "[$]{INCLUDE_LOG}" = true \]; then
+  echo "[$]{MESSAGE}" [|] mutt -s "Duplicacy Backup [$]{JOB_NAME} - [$]{STATUS}" \\
+    user@example.com -a "[$]{LOG_FILE}"
+else
+  echo "[$]{MESSAGE}" [|] mutt -s "Duplicacy Backup [$]{JOB_NAME} - [$]{STATUS}" \\
+    user@example.com
+fi$!m,
       )
     }
   end
