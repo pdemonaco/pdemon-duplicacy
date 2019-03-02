@@ -30,61 +30,61 @@
 #     },
 #   }
 #
-# @param storage_name [String]
+# @param storage_name
 #   Name of this particular storage backend as referenced by duplicacy for this
 #   specific repository. Note that the backend named 'default' is the primary.
 #
-# @param repo_path [String]
+# @param repo_path
 #   Directory in which this particular repository resides on this machine. 
 #
-# @param user [String]
+# @param user
 #   User to whom this repository belongs.
 #
-# @param pref_dir [Optional[String]]
+# @param pref_dir
 #   Directory containing the duplicacy preferences for this repository.
 #   Typically this is `${repo_path}/.duplicacy` however the application can
 #   support alternate paths.
 #
-# @param cron_entry [Hash[String, Variant[String, Integer]]]
+# @param cron_entry
 #   This parameter is used as an argument to the cron resource type, however,
 #   several parameters are overridden directly. In particular, `user` and
 #   `command` cannot be specified via remote arguments. For more detail see the
-#   [puppet cron resource documentation](https://puppet.com/docs/puppet/5.5/types/cron.html).
+#  (https://puppet.com/docs/puppet/5.5/types/cron.html).
 # 
-# @param backup_tag [Optional[String]]
+# @param backup_tag
 #   This string will be set as the tag argument for each backup performed by
 #   this job. These can be used by various duplicacy commands to filter to
 #   specific snapshots.
 #
-# @param threads [Optional[Integer]]
+# @param threads
 #   Number of parallel execution threads which will be spawned for this backup.
 #   Note that this defaults to 1 and should not be greater than the number of
 #   available threads on the target machine.
 #
-# @param hash_mode [Optional[Boolean]]
+# @param hash_mode
 #   Indicates whether a hash should be generated for each file to determine
 #   whether a change has occured. The alternate approach simply uses file size
 #   and modification timestamp. Note that this defaults to `false`.
 #
-# @param limit_rate [Optional[Integer]]
+# @param limit_rate
 #   Maximum upload data rate in kilobytes per second (KB/s). Note that leaving
 #   this unset implies no limit.
 #
-# @param email_recipient [Optional[String]]
+# @param email_recipient
 #   If specified, the job log will be sent to the specified address.
 #
 #   @note This assumes email is configured and working on this system.
 define duplicacy::backup (
-  String $storage_name = undef,
-  String $repo_path = undef,
-  String $user = undef,
+  String[1] $storage_name,
+  String[1] $repo_path,
+  String[1] $user,
   Hash[String, Variant[String, Integer, Array]] $cron_entry = {},
-  Optional[String] $pref_dir = "${repo_path}/.duplicacy",
-  Optional[String] $backup_tag = undef,
-  Optional[Integer] $threads = 1,
-  Optional[Boolean] $hash_mode = false,
-  Optional[Integer] $limit_rate = undef,
-  Optional[String] $email_recipient = undef,
+  Optional[String] $pref_dir                                = "${repo_path}/.duplicacy",
+  Optional[String] $backup_tag                              = undef,
+  Optional[Integer] $threads                                = 1,
+  Optional[Boolean] $hash_mode                              = false,
+  Optional[Integer] $limit_rate                             = undef,
+  Optional[String] $email_recipient                         = undef,
 ) {
 
   # Check if the mail recipient is valid

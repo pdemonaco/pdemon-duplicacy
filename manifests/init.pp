@@ -60,17 +60,17 @@
 #     },
 #   }
 #
-# @param package_name [Array[String]]
+# @param package_name
 #   Package or list of packages needed to install duplicacy on this host.
 #
-# @param mail_package_name [Array[String]]
+# @param mail_package_name
 #   Package or list of packages needed to send email from this host.
 #
-# @param local_repos [Array[String]]
+# @param local_repos
 #   List of repo names which should be deployed on this machine. Note that
 #   each repo must be defined in the `repos` parameter.
 #
-# @param repos [Hash]
+# @param repos
 #   A Hash where the keys are the names of the repositories to be deployed on
 #   this system are stored. This is a very deep structure.
 #

@@ -24,20 +24,20 @@
 #     },
 #   }
 #
-# @param storage_name [String]
+# @param storage_name
 #   Name of this particular storage backend as referenced by duplicacy for this
 #   specific repository. Note that the backend named 'default' is the primary.
 #
-# @param repo_id [String]
+# @param repo_id
 #   ID referencing this repository on the target storage backend. 
 #
-# @param repo_path [String]
+# @param repo_path
 #   Directory in which this particular repository resides on this machine. 
 #
-# @param user [String]
+# @param user
 #   User to whom this repository belongs.
 #
-# @param encryption [Optional[Hash[String, Variant[String, Integer]]]]
+# @param encryption
 #   This hash includes two key parameters related to encryption.
 #   * `password` - this is the password used to encrypt the config file
 #   * `iterations` - the number of iterations to generate the block password.
@@ -49,7 +49,7 @@
 #   See https://github.com/gilbertchen/duplicacy/wiki/Encryption for more
 #   details.
 #
-# @param target [Hash[String, Variant[String, Integer]]]
+# @param target
 #   Hash containing a number of details for the target system. Currently only b2
 #   is supported by this module.
 #   * 'url' - the url to provide to the init command
@@ -58,20 +58,20 @@
 #   * `b2_id` - ID from your b2 account
 #   * `b2_app_key` - the application key you generated for this bucket
 #
-# @param chunk_parameters [Optional[Hash[String, Integer]]]
+# @param chunk_parameters
 #   This hash includes three parameters defining how chunks are handled. The
 #   entire hash is optional, as are the sub components.
 #   * `size` - The target size of each chunk - defaults to 4M
 #   * `max` - largest possible chunk size - defaults to $size * 4
 #   * `min` - smallest possible chunk size - defaults to $size / 4
 define duplicacy::storage (
-  String $storage_name = undef,
-  String $repo_id = undef,
-  String $repo_path = undef,
-  String $user = undef,
-  Hash[String, Variant[String, Integer]] $target = {},
+  String[1] $storage_name,
+  String[1] $repo_id,
+  String[1] $repo_path,
+  String[1] $user,
+  Hash[String, Variant[String, Integer]] $target               = {},
   Optional[Hash[String, Variant[String, Integer]]] $encryption = {},
-  Optional[Hash[String, Integer]] $chunk_parameters = {},
+  Optional[Hash[String, Integer]] $chunk_parameters            = {},
 ) {
   # Declare the base command
   if ($storage_name == 'default') {

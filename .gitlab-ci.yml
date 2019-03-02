@@ -10,6 +10,8 @@ cache:
 before_script:
   - bundle -v
   - rm Gemfile.lock || true
+  - gem update --system --conservative || (gem i "rubygems-update:~>2.7" --no-document && update_rubygems)
+  - gem update bundler --conservative
   - gem update --system
   - gem --version
   - bundle -v

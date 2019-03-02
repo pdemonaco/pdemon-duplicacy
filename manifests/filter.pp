@@ -15,21 +15,21 @@
 #     ],
 #   }
 #
-# @param pref_dir [String]
+# @param pref_dir
 #   Path to the '.duplicacy' directory in which this filters file should be
 #   defined.
 #
-# @param user [String]
+# @param user
 #   Who should own this file? Typically this is also who runs the backups and
 #   owns the associated data.
 #
-# @param rules [Array[String]]
+# @param rules
 #   An array of strings which each correspond to a line of the filter file. See
 #   the https://github.com/gilbertchen/duplicacy/wiki/Include-Exclude-Patterns
 #   page for more detail.
 define duplicacy::filter(
-  String $pref_dir = undef,
-  String $user = undef,
+  String[1] $pref_dir,
+  String[1] $user,
   Array[String] $rules = [],
 ) {
   # 

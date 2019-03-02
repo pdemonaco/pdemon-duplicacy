@@ -1,4 +1,6 @@
-# A description of what this defined type does
+# Each entity of this type corresponds to a distinct repository for duplicacy to
+# back up. These repositories can potentially share backing storage resources.
+# Additionally, a repository can be declared simply for pruning purposes.
 #
 # @summary A short summary of the purpose of this defined type.
 #
@@ -63,18 +65,18 @@
 #     log_retention   => '5d'
 #   }
 #
-# @param repo_id [String]
+# @param repo_id
 #   The name of this particular repository. This is a namevar.
 #
-# @param repo_path [String]
+# @param repo_path
 #   Absolute path to the directory to be backed up. Note that backup directories
 #   should not be nested. 
 #
-# @param user [String]
+# @param user
 #   The name of the user who owns this repository for a given server. This user
 #   will also run the cron jobs for that system. Defaults to 'root'.
 # 
-# @param storage_targets [Hash[String, Variant[String, Hash[String, Variant[String, Hash[String, Variant[String, Integer]]]]]]]
+# @param storage_targets
 #   A hash of duplicacy::storage types against which this repo should be
 #   initialized. Note that there must be an entry named 'default'. Note that
 #   several of the parameters which can be directly specified to the storage
@@ -95,10 +97,10 @@
 #
 #   @note The following parameters must not be specified: `user`, `repo_path`
 #
-# @param filter_rules [Optional[Array[String]]]
+# @param filter_rules
 #   An ordered list of valid include/exclude filters for duplicacy.
 #
-# @param log_retention [Optional[String]]
+# @param log_retention
 #   The amount of time to retain logs in the log directory. Note that this is
 #   simply the age parameter to a
 #   [tidy](https://puppet.com/docs/puppet/5.5/types/tidy.html#tidy-attribute-age)

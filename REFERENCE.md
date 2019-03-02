@@ -134,11 +134,13 @@ Data type: `Hash[
             Variant[
               String,
               Integer,
+              Boolean,
               Hash[
                 String,
                 Variant[
                   String,
                   Integer,
+                  Array,
                 ]
               ]
             ]
@@ -157,6 +159,7 @@ Data type: `Hash[
                 Variant[
                   String,
                   Integer,
+                  Array,
                 ],
               ],
               Array[Hash[String, Integer]],
@@ -179,6 +182,8 @@ Default value: {}
 This define handles the creation of a single backup schedule for the target
 repository / storage combination. The schedule is carried out via a cron
 object and a script which is stored in the $pref_dir/puppet/scripts/
+
+ (https://puppet.com/docs/puppet/5.5/types/cron.html).
 
 #### Examples
 
@@ -220,28 +225,22 @@ The following parameters are available in the `duplicacy::backup` defined type.
 
 ##### `storage_name`
 
-Data type: `String`
+Data type: `String[1]`
 
 Name of this particular storage backend as referenced by duplicacy for this
 specific repository. Note that the backend named 'default' is the primary.
 
-Default value: `undef`
-
 ##### `repo_path`
 
-Data type: `String`
+Data type: `String[1]`
 
 Directory in which this particular repository resides on this machine.
 
-Default value: `undef`
-
 ##### `user`
 
-Data type: `String`
+Data type: `String[1]`
 
 User to whom this repository belongs.
-
-Default value: `undef`
 
 ##### `pref_dir`
 
@@ -255,12 +254,11 @@ Default value: "${repo_path}/.duplicacy"
 
 ##### `cron_entry`
 
-Data type: `Hash[String, Variant[String, Integer]]`
+Data type: `Hash[String, Variant[String, Integer, Array]]`
 
 This parameter is used as an argument to the cron resource type, however,
 several parameters are overridden directly. In particular, `user` and
 `command` cannot be specified via remote arguments. For more detail see the
-[puppet cron resource documentation](https://puppet.com/docs/puppet/5.5/types/cron.html).
 
 Default value: {}
 
@@ -341,21 +339,17 @@ The following parameters are available in the `duplicacy::filter` defined type.
 
 ##### `pref_dir`
 
-Data type: `String`
+Data type: `String[1]`
 
 Path to the '.duplicacy' directory in which this filters file should be
 defined.
 
-Default value: `undef`
-
 ##### `user`
 
-Data type: `String`
+Data type: `String[1]`
 
 Who should own this file? Typically this is also who runs the backups and
 owns the associated data.
-
-Default value: `undef`
 
 ##### `rules`
 
@@ -372,6 +366,8 @@ Default value: []
 This define handles the creation of a single backup schedule for the target
 repository / storage combination. The schedule is carried out via a cron
 object and a script which is stored in the $pref_dir/puppet/scripts/
+
+ (https://puppet.com/docs/puppet/5.5/types/cron.html).
 
 #### Examples
 
@@ -425,28 +421,22 @@ The following parameters are available in the `duplicacy::prune` defined type.
 
 ##### `storage_name`
 
-Data type: `String`
+Data type: `String[1]`
 
 Name of this particular storage backend as referenced by duplicacy for this
 specific repository. Note that the backend named 'default' is the primary.
 
-Default value: `undef`
-
 ##### `repo_path`
 
-Data type: `String`
+Data type: `String[1]`
 
 Directory in which this particular repository resides on this machine.
 
-Default value: `undef`
-
 ##### `user`
 
-Data type: `String`
+Data type: `String[1]`
 
 User to whom this repository belongs.
-
-Default value: `undef`
 
 ##### `pref_dir`
 
@@ -460,12 +450,11 @@ Default value: "${repo_path}/.duplicacy"
 
 ##### `cron_entry`
 
-Data type: `Hash[String, Variant[String, Integer]]`
+Data type: `Hash[String, Variant[String, Integer, Array]]`
 
 This parameter is used as an argument to the cron resource type, however,
 several parameters are overridden directly. In particular, `user` and
 `command` cannot be specified via remote arguments. For more detail see the
-[puppet cron resource documentation](https://puppet.com/docs/puppet/5.5/types/cron.html).
 
 Default value: {}
 
@@ -521,7 +510,9 @@ Default value: `undef`
 
 ### duplicacy::repository
 
-A description of what this defined type does
+Each entity of this type corresponds to a distinct repository for duplicacy to
+back up. These repositories can potentially share backing storage resources.
+Additionally, a repository can be declared simply for pruning purposes.
 
 #### Examples
 
@@ -641,11 +632,13 @@ Data type: `Optional[
         Variant[
           String,
           Integer,
+          Boolean,
           Hash[
             String,
             Variant[
               String,
               Integer,
+              Array,
             ],
           ],
         ],
@@ -678,6 +671,7 @@ Data type: `Optional[
             Variant[
               String,
               Integer,
+              Array,
             ],
           ],
           Array[
@@ -752,36 +746,28 @@ The following parameters are available in the `duplicacy::storage` defined type.
 
 ##### `storage_name`
 
-Data type: `String`
+Data type: `String[1]`
 
 Name of this particular storage backend as referenced by duplicacy for this
 specific repository. Note that the backend named 'default' is the primary.
 
-Default value: `undef`
-
 ##### `repo_id`
 
-Data type: `String`
+Data type: `String[1]`
 
 ID referencing this repository on the target storage backend.
 
-Default value: `undef`
-
 ##### `repo_path`
 
-Data type: `String`
+Data type: `String[1]`
 
 Directory in which this particular repository resides on this machine.
 
-Default value: `undef`
-
 ##### `user`
 
-Data type: `String`
+Data type: `String[1]`
 
 User to whom this repository belongs.
-
-Default value: `undef`
 
 ##### `encryption`
 

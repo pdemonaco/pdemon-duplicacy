@@ -42,31 +42,31 @@
 #     },
 #   }
 #
-# @param storage_name [String]
+# @param storage_name
 #   Name of this particular storage backend as referenced by duplicacy for this
 #   specific repository. Note that the backend named 'default' is the primary.
 #
-# @param repo_path [String]
+# @param repo_path
 #   Directory in which this particular repository resides on this machine. 
 #
-# @param user [String]
+# @param user
 #   User to whom this repository belongs.
 #
-# @param pref_dir [String]
+# @param pref_dir
 #   Directory containing the duplicacy preferences for this repository.
 #   Typically this is `${repo_path}/.duplicacy` however the application can
 #   support alternate paths.
 #
-# @param cron_entry [Hash[String, Variant[String, Integer]]]
+# @param cron_entry
 #   This parameter is used as an argument to the cron resource type, however,
 #   several parameters are overridden directly. In particular, `user` and
 #   `command` cannot be specified via remote arguments. For more detail see the
-#   [puppet cron resource documentation](https://puppet.com/docs/puppet/5.5/types/cron.html).
+#  (https://puppet.com/docs/puppet/5.5/types/cron.html).
 # 
-# @param backup_tags [Optional[Array[String]]]
+# @param backup_tags
 #   Limit the prune to impact only backups matching the specified tag or tags.
 #
-# @param keep_ranges [Array[Hash[String, Integer]]]
+# @param keep_ranges
 #   An ordered list of hashes where each hash contains two values:
 #   * `interval` - 1 snapshot will be kept for each interval of this length in days
 #   * `min_age` - policy applies to snapshots at least this number of days old
@@ -74,30 +74,30 @@
 #   These **must** be sorted by their M values in decreasing order - the module
 #   doesn't do this for you at the moment!
 #
-# @param exhaustive [Boolean]
+# @param exhaustive
 #   If this is enabled prune will remove unreferenced chunks created by other
 #   scenarios as well as files which don't appear to be backup chunks.
 #
-# @param threads [Optional[Integer]]
+# @param threads
 #   Number of parallel execution threads which will be spawned for this backup.
 #   Note that this defaults to 1 and should not be greater than the number of
 #   available threads on the target machine.
 #
-# @param email_recipient [Optional[String]]
+# @param email_recipient
 #   If specified, the job log will be sent to the specified address.
 #
 #   @note This assumes email is configured and working on this system.
 define duplicacy::prune (
-  String $storage_name                               = undef,
-  String $repo_path                                  = undef,
-  String $user                                       = undef,
+  String[1] $storage_name,
+  String[1] $repo_path,
+  String[1] $user,
   Hash[String, Variant[String, Integer, Array]] $cron_entry = {},
-  Boolean $exhaustive                                = false,
-  String $pref_dir                                   = "${repo_path}/.duplicacy",
-  Array[Hash[String, Integer]] $keep_ranges          = [],
-  Optional[Array[String]] $backup_tags               = [],
-  Optional[Integer] $threads                         = 1,
-  Optional[String] $email_recipient                  = undef,
+  Boolean $exhaustive                                       = false,
+  String $pref_dir                                          = "${repo_path}/.duplicacy",
+  Array[Hash[String, Integer]] $keep_ranges                 = [],
+  Optional[Array[String]] $backup_tags                      = [],
+  Optional[Integer] $threads                                = 1,
+  Optional[String] $email_recipient                         = undef,
 ) {
 
   # Check if the mail recipient is valid

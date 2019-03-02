@@ -39,20 +39,4 @@ describe 'duplicacy::filter' do
     it { is_expected.to contain_file_line('rule_0').that_requires('File[/my/backup/dir/.duplicacy/filters]') }
     it { is_expected.to contain_file_line('rule_1').that_requires(['File[/my/backup/dir/.duplicacy/filters]', 'File_line[rule_0]']) }
   end
-
-  # This doesn't do anything at the moment
-  context 'test compilation' do
-    let(:title) { 'namevar' }
-    let(:params) do
-      {}
-    end
-
-    on_supported_os.each do |os, os_facts|
-      context "on #{os}" do
-        let(:facts) { os_facts }
-
-        it { is_expected.to compile }
-      end
-    end
-  end
 end
