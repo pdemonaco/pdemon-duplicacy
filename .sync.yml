@@ -1,0 +1,9 @@
+---
+.gitlab-ci.yml:
+  defaults:
+    ruby_versions:
+      '2.5.1':
+        checks:
+          - 'syntax lint metadata_lint check:symlinks check:git_ignore check:dot_underscore check:test_file rubocop'
+          - parallel_spec
+        puppet_version: '~> 6.0'
