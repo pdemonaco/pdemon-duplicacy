@@ -12,6 +12,7 @@ type Duplicacy::RepositoryEntry = Hash[
   Variant[
     String,
     Hash[String, Duplicacy::StorageTarget],
+    Hash[String, Duplicacy::BackupSchedule],
     Hash[String, Duplicacy::PruneSchedule],
     Array[String],
   ],

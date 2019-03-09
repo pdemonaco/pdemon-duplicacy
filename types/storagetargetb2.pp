@@ -11,5 +11,8 @@ type Duplicacy::StorageTargetB2 = Hash[
     'b2_id',
     'b2_app_key',
   ],
-  String,
+  Variant[
+    String,
+    Duplicacy::B2Url,
+  ],
 ]

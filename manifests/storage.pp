@@ -214,9 +214,11 @@ define duplicacy::storage (
 
     # Build the test command to check if the storage has already been added to
     # the preferences file
-    $test_sed = "sed -e 's/\"//g' ${repo_path}/duplicacy/preferences"
-    $test_awk = "awk '/name/ {print \$2}'"
-    $test_grep = "grep ${storage_name}"
+    $test_storage_presence = @("EOT"/L$)
+      test 0 -eq $(sed -e 's/"//g' "${repo_path}/duplicacy/preferences" | \
+      awk '/name/ {print \$2}' | \
+      grep "${storage_name}" | wc -l)
+      |-EOT
     exec { "add_${repo_id}_${storage_name}":
       command     => "${repo_add_command}${cmd_log_args}",
       path        => '/usr/local/bin:/usr/bin:/bin',
@@ -224,7 +226,7 @@ define duplicacy::storage (
       environment => $env,
       onlyif      => [
         "test -f ${repo_path}/.duplicacy/preferences",
-        "test 0 -eq \$(${test_sed} | ${test_awk} | ${test_grep} | wc -l)",
+        $test_storage_presence,
       ],
     }
   }

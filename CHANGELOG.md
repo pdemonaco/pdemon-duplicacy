@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## Release 0.1.0-rc4
+
+**Features**
+* Puppet 6.x support
+* Created types to represent the massive repository data structure simplifying use & code
+
 ## Release 0.1.0-rc3
 
 **Features**

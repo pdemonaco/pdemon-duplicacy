@@ -171,8 +171,8 @@ describe 'duplicacy::storage' do
     }
 
     # There should be a file
-    it { is_expected.to have_file_resource_count(1) }
-    it {
+    it 'defines the environment' do
+      is_expected.to have_file_resource_count(1)
       is_expected.to contain_file('env_my-repo_other_bucket').with(
         ensure: 'file',
         path: '/my/super/safe/data/.duplicacy/puppet/scripts/other_bucket.env',
@@ -187,13 +187,13 @@ export DUPLICACY_OTHER_BUCKET_B2_KEY="my-app-key"
         group: 'me',
         mode: '0600',
       )
-    }
+    end
 
     it {
       is_expected.to contain_exec('add_my-repo_other_bucket').with(
         onlyif: [
           'test -f /my/super/safe/data/.duplicacy/preferences',
-          'test 0 -eq $(sed -e \'s/"//g\' /my/super/safe/data/duplicacy/preferences | awk \'/name/ {print $2}\' | grep other_bucket | wc -l)',
+          'test 0 -eq $(sed -e \'s/"//g\' "/my/super/safe/data/duplicacy/preferences" | awk \'/name/ {print $2}\' | grep "other_bucket" | wc -l)',
         ],
       )
     }
