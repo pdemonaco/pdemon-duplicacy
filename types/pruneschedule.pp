@@ -1,0 +1,19 @@
+type Duplicacy::PruneSchedule = Hash[
+  Enum[
+    'storage_name',
+    'cron_entry',
+    'exhaustive',
+    'keep_ranges',
+    'backup_tags',
+    'threads',
+    'email_recipient',
+  ],
+  Variant[
+    String,
+    Duplicacy::ScheduleEntry,
+    Boolean,
+    Array[Duplicacy::KeepRange],
+    Array[String],
+    Integer,
+  ],
+]

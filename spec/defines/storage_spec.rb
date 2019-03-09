@@ -16,7 +16,7 @@ describe 'duplicacy::storage' do
           'b2_app_key' => 'this-is-my-key',
         },
         'encryption' => {
-          'garbage' => 'this-should-be-password',
+          iterations: 7000,
         },
       }
     end
@@ -72,7 +72,7 @@ describe 'duplicacy::storage' do
         'repo_path' => '/my/super/safe/data',
         'user' => 'me',
         'target' => {
-          'garbage' => 'this should be the url',
+          b2_id: 'this should be the url',
         },
       }
     end

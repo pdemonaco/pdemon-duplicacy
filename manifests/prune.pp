@@ -91,13 +91,13 @@ define duplicacy::prune (
   String[1] $storage_name,
   String[1] $repo_path,
   String[1] $user,
-  Hash[String, Variant[String, Integer, Array]] $cron_entry = {},
-  Boolean $exhaustive                                       = false,
-  String $pref_dir                                          = "${repo_path}/.duplicacy",
-  Array[Hash[String, Integer]] $keep_ranges                 = [],
-  Optional[Array[String]] $backup_tags                      = [],
-  Optional[Integer] $threads                                = 1,
-  Optional[String] $email_recipient                         = undef,
+  Duplicacy::ScheduleEntry $cron_entry      = {},
+  Boolean $exhaustive                       = false,
+  String $pref_dir                          = "${repo_path}/.duplicacy",
+  Array[Duplicacy::KeepRange] $keep_ranges  = [],
+  Optional[Array[String]] $backup_tags      = [],
+  Optional[Integer] $threads                = 1,
+  Optional[String] $email_recipient         = undef,
 ) {
 
   # Check if the mail recipient is valid

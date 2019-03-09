@@ -106,57 +106,14 @@
 #   [tidy](https://puppet.com/docs/puppet/5.5/types/tidy.html#tidy-attribute-age)
 #   resource.
 define duplicacy::repository (
-  String $repo_id = $name,
-  String $repo_path = undef,
-  String $user = 'root',
-  Hash[String, Variant[String, Hash[String, Variant[String, Hash[String, Variant[String, Integer]]]]]] $storage_targets = {},
-  Optional[
-    Hash[
-      String,
-      Hash[
-        String,
-        Variant[
-          String,
-          Integer,
-          Boolean,
-          Hash[
-            String,
-            Variant[
-              String,
-              Integer,
-              Array,
-            ],
-          ],
-        ],
-      ],
-    ]
-  ] $backup_schedules = {},
-  Optional[
-    Hash[
-      String,
-      Hash[
-        String,
-        Variant[
-          String,
-          Integer,
-          Boolean,
-          Hash[
-            String,
-            Variant[
-              String,
-              Integer,
-              Array,
-            ],
-          ],
-          Array[
-            Hash[String, Integer]
-          ],
-        ],
-      ],
-    ]
-  ] $prune_schedules = {},
-  Optional[Array[String]] $filter_rules = [],
-  Optional[String] $log_retention = '4w',
+  String[1] $repo_path,
+  String[1] $repo_id                                                  = $name,
+  String[1] $user                                                     = 'root',
+  Hash[String, Duplicacy::StorageTarget] $storage_targets             = {},
+  Optional[Hash[String, Duplicacy::BackupSchedule]] $backup_schedules = {},
+  Optional[Hash[String, Duplicacy::PruneSchedule]] $prune_schedules   = {},
+  Optional[Array[String]] $filter_rules                               = [],
+  Optional[String] $log_retention                                     = '4w',
 ) {
   # TODO - actually really support alternate pref_dirs
   $pref_dir = "${repo_path}/.duplicacy"

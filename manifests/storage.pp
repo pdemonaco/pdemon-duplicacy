@@ -67,11 +67,11 @@
 define duplicacy::storage (
   String[1] $storage_name,
   String[1] $repo_id,
-  String[1] $repo_path,
+  Stdlib::Absolutepath $repo_path,
   String[1] $user,
-  Hash[String, Variant[String, Integer]] $target               = {},
-  Optional[Hash[String, Variant[String, Integer]]] $encryption = {},
-  Optional[Hash[String, Integer]] $chunk_parameters            = {},
+  Duplicacy::StorageTargetType $target                       = {},
+  Optional[Duplicacy::StorageEncryption] $encryption         = {},
+  Optional[Duplicacy::StorageChunkParams] $chunk_parameters  = {},
 ) {
   # Declare the base command
   if ($storage_name == 'default') {

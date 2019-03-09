@@ -28,7 +28,7 @@
 #   the https://github.com/gilbertchen/duplicacy/wiki/Include-Exclude-Patterns
 #   page for more detail.
 define duplicacy::filter(
-  String[1] $pref_dir,
+  Stdlib::Absolutepath $pref_dir,
   String[1] $user,
   Array[String] $rules = [],
 ) {
