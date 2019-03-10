@@ -1,5 +1,4 @@
-<%- |   String $storage_name,
-  String $job_name,
+<%- |
   String $repo_dir,
   String $pref_dir,
   Boolean $exhaustive,
@@ -8,11 +7,9 @@
   Optional[Array[String]] $backup_tags = [],
   Optional[String] $email_recipient = undef,
 | -%>
-#!/bin/sh
+#!/bin/bash
 #==== Constants
 PATH="/usr/local/bin:/usr/bin:/bin"
-STORAGE_NAME="<%= $storage_name %>"
-JOB_NAME="<%= $job_name %>"
 TIMESTAMP=$(date +%Y-%m-%d_%H%M%S)
 
 # Paths
@@ -22,43 +19,85 @@ LOCK_DIR="${PUPPET_DIR}/locks"
 LOG_DIR="${PUPPET_DIR}/logs"
 SCRIPT_DIR="${PUPPET_DIR}/scripts"
 
-# Config files
-LOCK_FILE="${LOCK_DIR}/${STORAGE_NAME}.lock"
-LOG_FILE="${LOG_DIR}/${STORAGE_NAME}_prune_${JOB_NAME}_${TIMESTAMP}.log"
-LOG_PARSER="${SCRIPT_DIR}/log_summary.sh"
+#==== Print Error Message
+function echoerr()
+{
+    printf "%s\n" "$*" >&2;
+    exit 1
+}
 
 #==== Check for locks and aquire
-acquire_backup_lock()
+function acquire_backup_lock()
 {
   # Abort if locked!
   if [ -e "${LOCK_FILE}" ]
   then
-    echo "${STORAGE_NAME} is locked!" >&2
-    exit 1
+    echoerr "${0}: ${STORAGE_NAME} is locked!"
   # Otherwise capture backup name & PID
   else
     echo "${JOB_NAME}: $$" > "${LOCK_FILE}"
   fi
 }
 
+#==== Parse Arguments
+function parse_arguments()
+{
+  while (( "$#" ));
+  do
+    case "$1" in
+      -i|--id)
+        REPO_ID=$2
+        shift 2
+        ;;
+      -s|--storage)
+        STORAGE_NAME=$2
+        shift 2
+        ;;
+      -*)
+        echoerr "${0}: Unsupported flag ${1}"
+        ;;
+    esac
+  done
+
+  if [ -z "${STORAGE_NAME}" ];
+  then
+    echoerr "${0}: STORAGE_NAME is mandatory!"
+  fi
+
+  if [ -z "${REPO_ID}" ];
+  then
+    echoerr "${0}: REPO_ID is mandatory!"
+  fi
+
+  JOB_NAME="${REPO_ID}_${STORAGE_NAME}_prune"
+  LOCK_FILE="${LOCK_DIR}/${STORAGE_NAME}.lock"
+  LOG_FILE="${LOG_DIR}/${JOB_NAME}_${TIMESTAMP}.log"
+}
+
 #==== Main Routine
+
+# Record the parameters
+# shellcheck disable=SC2068
+parse_arguments $@
 
 # Acquire the storage lock for this repo or abort
 acquire_backup_lock
 
 # Retrieve our credentials
-. <%= $pref_dir %>/puppet/scripts/<%= $storage_name %>.env
+. "<%= $pref_dir %>/puppet/scripts/${STORAGE_NAME}.env"
 
 # Move to the root of the repository
 cd "${REPO_DIR}" || exit 1
 
 # Execute
 duplicacy -log -background prune \
+  -id "${REPO_ID}" \
+  -storage "${STORAGE_NAME}" \
 <% $keep_ranges.each | $entry | {
   if ! ('interval' in $entry) {
-    fail("${job_name}: keep range entry missing 'interval'!")
+    fail("Keep range entry missing 'interval'!")
   } elsif ! ('min_age' in $entry) {
-    fail("${job_name}: keep range entry missing 'min_age'!")
+    fail("Keep range entry missing 'min_age'!")
   } -%>
   -keep <%= $entry['interval'] %>:<%= $entry['min_age'] %> \
 <% }
@@ -70,19 +109,17 @@ if $exhaustive { -%>
   -t <%= $tag_name %> \
 <% }
 } -%>
-<% if $storage_name != 'default' { -%>
-  -storage <%= $storage_name %> \
-<% } -%>
   -threads <%= $threads %> >"${LOG_FILE}" 2>&1
 <% if $email_recipient { -%>
 
 # Notify someone about what happened
+LOG_PARSER="${SCRIPT_DIR}/log_summary.sh"
 RC="$?"
 MESSAGE=""
 case "${RC}" in
   0)
     STATUS="Success"
-    MESSAGE=$("${LOG_PARSER}" BACKUP "${LOG_FILE}")
+    MESSAGE=$("${LOG_PARSER}" PRUNE "${LOG_FILE}")
     ;;
   1)
     STATUS="Failure"
@@ -109,7 +146,7 @@ case "${RC}" in
     MESSAGE="Return code - ${RC}. See attached log."
     ;;
 esac
-echo "${MESSAGE}" | mutt -s "Duplicacy Prune ${JOB_NAME} - ${STATUS}" <%= $email_recipient %> -a "${LOG_FILE}"
+echo "${MESSAGE}" | mutt -s "Duplicacy ${JOB_NAME} - ${STATUS}" <%= $email_recipient %> -a "${LOG_FILE}"
 <% } -%>
 
 # Release the lock

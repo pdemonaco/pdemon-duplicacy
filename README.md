@@ -63,7 +63,7 @@ duplicacy {
           target       => {
             url        => 'b2://pdemon-duplicacy-test',
             b2_id      => 'my-b2-id-is-a-secret',
-            b2_app_key => 'so is my key'
+            b2_app_key => 'this is my key'
           },
           encryption => {
             password => 'my-secret-password'
@@ -81,24 +81,18 @@ duplicacy {
         },
       },
       prune_schedules  => {
-        daily-0000     => {
-          storage_name => default,
-          cron_entry   => {
-            hour       => '0',
+        '7d-8w' => {
+          schedules   => {
+            daily-prune => {
+              cron_entry   => {
+                hour       => '0',
+              },
+            },
           },
-          keep_ranges     => {
-            { 
-              interval => 0,
-              max_age  => 90,
-            },
-            { 
-              interval => 7,
-              max_age  => 30,
-            },
-            { 
-              interval => 1,
-              max_age  => 7,
-            },
+          keep_ranges => {
+            { interval => 0, max_age  => 90 },
+            { interval => 7, max_age  => 30 },
+            { interval => 1, max_age  => 7 },
           },
           threads         => 6,
           email_recipient => 'phil@demona.co',
@@ -147,11 +141,12 @@ duplicacy::repos:
         threads: 4
         hash: true
     prune_schedules:
-      daily-0000:
-        storage_name: 'default'
-        cron_entry:
-          minute: '0'
-          hour: '0'
+      7d-9w:
+        schedules:
+          daily_prune:
+            cron_entry:
+              minute: '0'
+              hour: '0'
         keep_ranges:
           - interval: 0 
             min_age: 365

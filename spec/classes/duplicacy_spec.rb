@@ -2,102 +2,86 @@ require 'spec_helper'
 require 'deep_merge'
 
 describe 'duplicacy' do
-  let(:facts) do
-    {
-      'os' => {
-        'architecture' => 'amd64',
-        'family' => 'Gentoo',
-        'hardware' => 'x86_64',
-        'name' => 'Gentoo',
-        'release' => {
-          'full' =>  '2.4.1',
-          'major' => '2',
-          'minor' => '4',
-        },
-      },
-    }
-  end
-
-  let(:params) do
-    {
-      'local_repos' => ['my-repo'],
-      'repos' => {
-        'my-repo' => {
-          'repo_path' => '/my/backup/dir',
-          'user' => 'root',
-          'storage_targets' => {
-            'default' => {
-              'target' => {
-                'url' => 'b2://my-bucket',
-                'b2_id' => 'my-id',
-                'b2_app_key' => 'my-key',
-              },
-              'encryption' => {
-                'password' => 'batman',
-              },
-            },
-          },
-          'filter_rules' => [
-            '+foo/baz/*',
-            '-*',
-          ],
-          'backup_schedules' => {
-            'daily-0130' => {
-              'storage_name' => 'default',
-              'cron_entry' => {
-                'hour' => '1',
-                'minute' => '30',
-              },
-              'threads' => 8,
-              'email_recipient' => 'me@example.com',
-            },
-          },
-          'prune_schedules' => {
-            'daily-0000' => {
-              'storage_name' => 'default',
-              'cron_entry' => {
-                'hour' => '0',
-                'minute' => '0',
-              },
-              'keep_ranges' => [
-                {
-                  'interval' => 0,
-                  'min_age' => 90,
+  on_supported_os.each do |os, os_facts|
+    context "on #{os}" do
+      let(:facts) { os_facts }
+      let(:params) do
+        {
+          local_repos: ['my-repo'],
+          repos: {
+            'my-repo' => {
+              repo_path: '/my/backup/dir',
+              user: 'root',
+              storage_targets: {
+                'default' => {
+                  target: {
+                    url: 'b2://my-bucket',
+                    b2_id: 'my-id',
+                    b2_app_key: 'my-key',
+                  },
+                  encryption: {
+                    password: 'batman',
+                  },
                 },
-                {
-                  'interval' => 7,
-                  'min_age' => 30,
-                },
-                {
-                  'interval' => 1,
-                  'min_age' => 7,
-                },
+              },
+              filter_rules: [
+                '+foo/baz/*',
+                '-*',
               ],
-              'threads' => 8,
-              'email_recipient' => 'me@example.com',
+              backup_schedules: {
+                'daily-0130' => {
+                  storage_name: 'default',
+                  cron_entry: {
+                    hour: '1',
+                    minute: '30',
+                  },
+                  threads: 8,
+                  email_recipient: 'me@example.com',
+                },
+              },
+              prune_schedules: {
+                'retain-all-30d' => {
+                  schedules: {
+                    'daily-prune' => {
+                      repo_id: 'my-repo',
+                      cron_entry: {
+                        hour: '0',
+                        minute: '0',
+                      },
+                    },
+                  },
+                  keep_ranges: [
+                    { interval: 0, min_age: 90 },
+                    { interval: 7, min_age: 30 },
+                    { interval: 1, min_age: 7 },
+                  ],
+                  threads: 8,
+                  email_recipient: 'me@example.com',
+                },
+              },
             },
           },
-        },
-      },
-    }
-  end
+        }
+      end
 
-  context 'Compiles' do
-    it { is_expected.to compile }
+      context 'compiles and installs packages' do
+        it { is_expected.to compile }
 
-    it { is_expected.to contain_package('app-backup/duplicacy-bin') }
-    it { is_expected.to contain_package('mail-client/mutt') }
-  end
+        it { is_expected.to contain_package('app-backup/duplicacy-bin') }
+        it { is_expected.to contain_package('mail-client/mutt') }
+      end
 
-  context 'Skipping undefined repo' do
-    let(:params) do
-      super().merge('local_repos' => ['missing-repo'])
+      context 'Skipping undefined repo' do
+        let(:params) do
+          super().merge(local_repos: ['missing-repo'])
+        end
+
+        it { is_expected.to contain_notify('Skipping undefined repo: missing-repo') }
+      end
+
+      context 'One real repo' do
+        it { is_expected.to contain_duplicacy__repository('my-repo') }
+      end
     end
-
-    it { is_expected.to contain_notify('Skipping undefined repo: missing-repo') }
-  end
-
-  context 'One real repo' do
-    it { is_expected.to contain_duplicacy__repository('my-repo') }
   end
 end

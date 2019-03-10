@@ -32,25 +32,21 @@
 #             'email_recipient' => phil@demona.co,
 #           },
 #         },
-#         prune_schedules  => {
-#           daily-0000     => {
-#             storage_name => default,
-#             cron_entry   => {
-#               hour       => '0',
+#         prune_schedules          => {
+#           retain-7d1d-30d1w-90d0 => {
+#             storage_name         => default,
+#             schedules            => {
+#               daily-prune        => {
+#                 cron_entry       => {
+#                   repo_id        => 'my-repo',
+#                   hour           => '0',
+#                 },
+#               },
 #             },
 #             keep_ranges     => {
-#               { 
-#                 interval => 0,
-#                 max_age  => 90,
-#               },
-#               { 
-#                 interval => 7,
-#                 max_age  => 30,
-#               },
-#               { 
-#                 interval => 1,
-#                 max_age  => 7,
-#               },
+#               { interval => 0, max_age  => 90 },
+#               { interval => 7, max_age  => 30 },
+#               { interval => 1, max_age  => 7 },
 #             },
 #             threads         => 6,
 #             email_recipient => 'phil@demona.co',

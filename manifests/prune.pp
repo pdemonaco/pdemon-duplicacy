@@ -4,15 +4,27 @@
 #
 # @summary Generates a script & schedules it given the specified parameters
 #
-# @example Full configuration for a given backup job.
+# @example Full configuration for a given job type.
 #   duplicacy::prune { 'my-repo_weekly': 
-#     storage_name => 'default',
-#     repo_path    => '/backup/dir',
-#     pref_dir     => '/backup/dir/.duplicacy',
-#     user         => 'root',
-#     cron_entry   => {
-#       hour       => '0',
-#       weekday    => '0',
+#     storage_name       => 'default',
+#     repo_path          => '/backup/dir',
+#     pref_dir           => '/backup/dir/.duplicacy',
+#     user               => 'root',
+#     schedules          => {
+#       'sunday-midnight' => {
+#         repo_id    => 'my-repo'
+#         cron_entry      => {
+#           hour          => '0',
+#           weekday       => '0',
+#         },
+#       },
+#       'saturday-midnight-other-repo' => {
+#         repo_id    => 'my-repo'
+#         cron_entry      => {
+#           hour          => '0',
+#           weekday       => '6',
+#         },
+#       },
 #     },
 #     keep_ranges     => [
 #       { interval => 0, min_age => 365 },
@@ -37,14 +49,15 @@
 #     user         => 'root',
 #     keep_ranges  => [
 #       { interval => 0, min_age => 90 },
-#     cron_entry   => {
-#       hour       => '0',
+#     schedules => {
+#       'daily-midnight' => {
+#         repo_id    => 'my-repo'
+#         cron_entry => {
+#           hour => '0',
+#         },
+#       },
 #     },
 #   }
-#
-# @param storage_name
-#   Name of this particular storage backend as referenced by duplicacy for this
-#   specific repository. Note that the backend named 'default' is the primary.
 #
 # @param repo_path
 #   Directory in which this particular repository resides on this machine. 
@@ -57,11 +70,19 @@
 #   Typically this is `${repo_path}/.duplicacy` however the application can
 #   support alternate paths.
 #
-# @param cron_entry
-#   This parameter is used as an argument to the cron resource type, however,
-#   several parameters are overridden directly. In particular, `user` and
-#   `command` cannot be specified via remote arguments. For more detail see the
-#  (https://puppet.com/docs/puppet/5.5/types/cron.html).
+# @param schedules
+#   Each entry in this parameter has two mandatory components:
+#   * `repo_id` - ID of the snapshot to be pruned. Note that this can be any
+#     repository which uses the same storage backend and credentials.
+#   * `cron_entry` - argument to the cron resource type, however,
+#    several parameters are overridden directly. In particular, *user* and
+#    *command* cannot be specified via remote arguments. For more detail see the
+#    (https://puppet.com/docs/puppet/5.5/types/cron.html).
+#
+#   Additionally, the following optional parameter can be included 
+#   * `storage_name` - Name of this particular storage backend as 
+#     referenced by duplicacy for this specific repository. Note that the 
+#     backend named 'default' is the primary.
 # 
 # @param backup_tags
 #   Limit the prune to impact only backups matching the specified tag or tags.
@@ -86,28 +107,26 @@
 # @param email_recipient
 #   If specified, the job log will be sent to the specified address.
 #
+# @param default_id
+#   This is the name of the current repository. It is used if repo_id is left
+#   out of a given prune schedule entry.
+#
 #   @note This assumes email is configured and working on this system.
 define duplicacy::prune (
-  String[1] $storage_name,
   String[1] $repo_path,
+  String[1] $default_id,
   String[1] $user,
-  Duplicacy::ScheduleEntry $cron_entry      = {},
-  Boolean $exhaustive                       = false,
-  String $pref_dir                          = "${repo_path}/.duplicacy",
-  Array[Duplicacy::KeepRange] $keep_ranges  = [],
-  Optional[Array[String]] $backup_tags      = [],
-  Optional[Integer] $threads                = 1,
-  Optional[String] $email_recipient         = undef,
+  Hash[String, Duplicacy::PruneScheduleEntry] $schedules = {},
+  Boolean $exhaustive                                    = false,
+  String $pref_dir                                       = "${repo_path}/.duplicacy",
+  Array[Duplicacy::KeepRange] $keep_ranges               = [],
+  Optional[Array[String]] $backup_tags                   = [],
+  Optional[Integer] $threads                             = 1,
+  Optional[Duplicacy::EmailRecipient] $email_recipient   = undef,
 ) {
-
-  # Check if the mail recipient is valid
-  if $email_recipient and $email_recipient !~ /[[:alnum:]._%+-]+@[[:alnum:].-]+\.[[:alnum:]]{2,}/ {
-    fail("Invalid email address: ${email_recipient}")
-  }
-
   # Ensure that a cron schedule was actually provided
-  if empty($cron_entry) {
-    fail('A schedule entry must be specified in cron resource format!')
+  if empty($schedules) {
+    fail('At least one schedule entry must be specified!')
   }
 
   # Ensure that some number of keep stanzas were specified!
@@ -117,8 +136,6 @@ define duplicacy::prune (
 
   # Arguments for the script file
   $epp_arguments = {
-    'storage_name'    => $storage_name,
-    'job_name'        => $name,
     'repo_dir'        => $repo_path,
     'pref_dir'        => $pref_dir,
     'exhaustive'      => $exhaustive,
@@ -141,12 +158,29 @@ define duplicacy::prune (
     content => epp('duplicacy/prune.sh.epp', $epp_arguments ),
   }
 
-  # Add a cron entry for this user
-  cron { "prune-cron_${name}":
-    ensure  => present,
-    command => $script_file,
-    user    => $user,
-    require => File["prune-script_${name}"],
-    *       => $cron_entry,
+  # Schedule the corresponding jobs
+  $schedules.each |$schedule_name, $schedule| {
+    unless('cron_entry' in $schedule) {
+      fail("Schedule ${schedule_name} missing cron entry!")
+    }
+    if 'repo_id' in $schedule {
+      $repo_id = $schedule['repo_id']
+    } else {
+      $repo_id = $default_id
+    }
+    if 'storage_name' in $schedule {
+      $storage_name = $schedule['storage_name']
+    } else {
+      $storage_name = 'default'
+    }
+    $cron_entry = $schedule['cron_entry']
+
+    cron { "prune-cron_${name}_${schedule_name}":
+      ensure  => present,
+      command => "${script_file} -i ${repo_id} -s ${storage_name}",
+      user    => $user,
+      require => File["prune-script_${name}"],
+      *       => $cron_entry,
+    }
   }
 }
