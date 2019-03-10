@@ -38,25 +38,21 @@
 #         email_recipient => 'batman@batcave.com',
 #       },
 #     },
-#     prune_schedules  => {
-#       daily-0000     => {
-#         storage_name => default,
-#         cron_entry   => {
-#           hour       => '0',
+#     prune_schedules          => {
+#       retain-7d1d-30d1w-90d0 => {
+#         storage_name         => default,
+#         schedules            => {
+#           daily-prune        => {
+#             cron_entry       => {
+#               repo_id        => 'my-repo',
+#               hour           => '0',
+#             },
+#           },
 #         },
 #         keep_ranges     => {
-#           { 
-#             interval => 0,
-#             max_age  => 90,
-#           },
-#           { 
-#             interval => 7,
-#             max_age  => 30,
-#           },
-#           { 
-#             interval => 1,
-#             max_age  => 7,
-#           },
+#           { interval => 0, max_age  => 90 },
+#           { interval => 7, max_age  => 30 },
+#           { interval => 1, max_age  => 7 },
 #         },
 #         threads         => 6,
 #         email_recipient => 'batman@batcave.com',
@@ -163,7 +159,7 @@ define duplicacy::repository (
     owner          => $user,
     group          => $user,
     checksum       => 'sha256',
-    checksum_value => 'd419e6cacd0e6d570a2635364834d3de32981e8998e554bf1651a05393d0f00d',
+    checksum_value => '00ec6040491f0204d64f5ca2a6bc12403dafd33ec23341c8f595439e709e8fc5',
     content        => file('duplicacy/log_summary.sh'),
     require        => File["${pref_dir}/puppet/scripts"],
   }
@@ -229,13 +225,13 @@ define duplicacy::repository (
 
   # Schedule Prunes
   unless(empty($prune_schedules)) {
-    $prune_schedules.each | $title, $schedule | {
-      $storage_name = $schedule['storage_name']
-      duplicacy::prune { "${repo_id}_${storage_name}_${title}":
-        repo_path => $repo_path,
-        user      => $user,
-        *         => $schedule,
-        require   => Duplicacy::Storage["${repo_id}_${storage_name}"],
+    $prune_schedules.each | $schedule_title, $schedule | {
+      duplicacy::prune { "${repo_id}_${schedule_title}":
+        default_id => $repo_id,
+        repo_path  => $repo_path,
+        user       => $user,
+        *          => $schedule,
+        require    => Duplicacy::Storage["${repo_id}_default"],
       }
     }
   }
