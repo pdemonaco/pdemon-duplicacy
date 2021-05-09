@@ -1,19 +1,10 @@
-type Duplicacy::RepositoryEntry = Hash[
-  Enum[
-    'repo_path',
-    'repo_id',
-    'user',
-    'storage_targets',
-    'backup_schedules',
-    'prune_schedules',
-    'filter_rules',
-    'log_retention',
-  ],
-  Variant[
-    String,
-    Hash[String, Duplicacy::StorageTarget],
-    Hash[String, Duplicacy::BackupSchedule],
-    Hash[String, Duplicacy::PruneSchedule],
-    Array[String],
-  ],
+type Duplicacy::RepositoryEntry = Struct[
+  repo_path                  => Stdlib::AbsolutePath,
+  Optional[repo_id]          => Duplicacy::SnapshotID,
+  user                       => String,
+  storage_targets            => Hash[String, Duplicacy::StorageTarget],
+  Optional[backup_schedules] => Hash[String, Duplicacy::BackupSchedule],
+  Optional[prune_schedules]  => Hash[String, Duplicacy::PruneSchedule],
+  Optional[filter_rules]     => Array[String],
+  Optional[log_retention]    => String,
 ]

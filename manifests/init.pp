@@ -74,7 +74,7 @@ class duplicacy (
   String $package_name,
   String $mail_package_name,
   Array[String] $local_repos,
-  Hash[String, Duplicacy::RepositoryEntry] $repos = {},
+  Hash[Duplicacy::SnapshotID, Duplicacy::RepositoryEntry] $repos = {},
 ) {
   # Ensure the duplicacy package is present
   package { $duplicacy::package_name:
