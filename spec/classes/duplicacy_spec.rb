@@ -68,7 +68,7 @@ describe 'duplicacy' do
         is_expected.to compile.with_all_deps
       end
 
-      package_list = if os =~ %r{gentoo}
+      package_list = if os.include?('gentoo')
                        ['app-backup/duplicacy-bin', 'mail-client/mutt']
                      else
                        ['duplicacy', 'mutt']
