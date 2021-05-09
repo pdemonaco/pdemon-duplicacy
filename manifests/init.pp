@@ -71,8 +71,8 @@
 #   this system are stored. This is a very deep structure.
 #
 class duplicacy (
-  Array[String] $package_name,
-  Array[String] $mail_package_name,
+  String $package_name,
+  String $mail_package_name,
   Array[String] $local_repos,
   Hash[String, Duplicacy::RepositoryEntry] $repos = {},
 ) {

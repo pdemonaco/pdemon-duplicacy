@@ -1,9 +1,18 @@
+# This file can be used to customize the files managed by PDK.
+#
+# See https://github.com/puppetlabs/pdk-templates/blob/main/README.md
+# for more information.
+#
+# See https://github.com/puppetlabs/pdk-templates/blob/main/config_defaults.yml
+# for the default values.
 ---
-.gitlab-ci.yml:
-  defaults:
-    ruby_versions:
-      '2.5.1':
-        checks:
-          - 'syntax lint metadata_lint check:symlinks check:git_ignore check:dot_underscore check:test_file rubocop'
-          - parallel_spec
-        puppet_version: '~> 6.0'
+spec/spec_helper.rb:
+  coverage_report: true
+  mock_with: ':rspec'
+  minimum_code_coverage_percentage: 90
+.rubocop.yml:
+  default_configs:
+    AllCops:
+      TargetRubyVersion: '2.4'
+    Style/FrozenStringLiteralComment:
+      Enabled: false

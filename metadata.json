@@ -10,7 +10,7 @@
   "dependencies": [
     {
       "name": "puppetlabs/stdlib",
-      "version_requirement": ">= 5.0 < 6.0.0"
+      "version_requirement": ">= 5.0 < 8.0.0"
     },
     {
       "name": "puppetlabs/cron_core",
@@ -19,13 +19,20 @@
   ],
   "operatingsystem_support": [
     {
+      "operatingsystem": "RedHat",
+      "operatingsystemrelease": [
+        "7",
+        "8"
+      ]
+    },
+    {
       "operatingsystem": "Gentoo"
     }
   ],
   "requirements": [
     {
       "name": "puppet",
-      "version_requirement": ">= 5.0.0 < 7.0.0"
+      "version_requirement": ">= 6.21.0 < 8.0.0"
     }
   ],
   "tags": [
