@@ -1,3 +1,4 @@
+# @summary Backup schedule for a given storage target
 type Duplicacy::BackupSchedule = Struct[
   storage_name              => String,
   cron_entry                => Duplicacy::ScheduleEntry,

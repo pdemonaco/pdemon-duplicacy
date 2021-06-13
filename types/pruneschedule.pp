@@ -1,3 +1,4 @@
+# @summary Prune schedule entry
 type Duplicacy::PruneSchedule = Struct[
   schedules                 => Hash[String, Duplicacy::PruneScheduleEntry],
   Optional[exhaustive]      => Boolean,

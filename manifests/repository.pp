@@ -103,7 +103,7 @@
 #   resource.
 define duplicacy::repository (
   String[1] $repo_path,
-  String[1] $repo_id                                                  = $name,
+  Duplicacy::SnapshotID $repo_id                                      = $name,
   String[1] $user                                                     = 'root',
   Hash[String, Duplicacy::StorageTarget] $storage_targets             = {},
   Optional[Hash[String, Duplicacy::BackupSchedule]] $backup_schedules = {},

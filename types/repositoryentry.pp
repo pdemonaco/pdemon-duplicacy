@@ -1,3 +1,4 @@
+# @summary Configures a directory as a duplicacy backup repository
 type Duplicacy::RepositoryEntry = Struct[
   repo_path                  => Stdlib::AbsolutePath,
   Optional[repo_id]          => Duplicacy::SnapshotID,
