@@ -1,11 +1,5 @@
-type Duplicacy::PruneScheduleEntry = Hash[
-  Enum[
-    'repo_id',
-    'storage_name',
-    'cron_entry',
-  ],
-  Variant[
-    String,
-    Duplicacy::ScheduleEntry,
-  ],
+type Duplicacy::PruneScheduleEntry = Struct[
+  Optional[repo_id]      => String,
+  Optional[storage_name] => String,
+  cron_entry             => Duplicacy::ScheduleEntry,
 ]

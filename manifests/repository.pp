@@ -183,11 +183,11 @@ define duplicacy::repository (
         repo_id      => $repo_id,
         repo_path    => $repo_path,
         user         => $user,
+        *            => $params,
         require      => [
           Duplicacy::Storage["${repo_id}_default"],
           File["${pref_dir}/puppet"],
         ],
-        *            => $params,
       }
     }
   }

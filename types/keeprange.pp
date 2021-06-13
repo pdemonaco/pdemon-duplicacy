@@ -1,10 +1,4 @@
-type Duplicacy::KeepRange = Hash[
-  Enum[
-    'interval',
-    'min_age',
-  ],
-  Variant[
-    String,
-    Integer,
-  ],
+type Duplicacy::KeepRange = Struct[
+  interval => Integer,
+  min_age  => Integer,
 ]

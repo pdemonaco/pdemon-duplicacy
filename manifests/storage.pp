@@ -69,9 +69,9 @@ define duplicacy::storage (
   String[1] $repo_id,
   Stdlib::Absolutepath $repo_path,
   String[1] $user,
-  Duplicacy::StorageTargetType $target                       = {},
-  Optional[Duplicacy::StorageEncryption] $encryption         = {},
-  Optional[Duplicacy::StorageChunkParams] $chunk_parameters  = {},
+  Duplicacy::StorageTargetType $target,
+  Optional[Duplicacy::StorageEncryption] $encryption         = undef,
+  Optional[Duplicacy::StorageChunkParams] $chunk_parameters  = undef,
 ) {
   # Declare the base command
   if ($storage_name == 'default') {
@@ -82,7 +82,7 @@ define duplicacy::storage (
   }
 
   # Process encryption parameters
-  if !empty($encryption) {
+  if $encryption {
     # Extract the password, this is mandatory
     if 'password' in $encryption {
       $password = $encryption['password']
@@ -107,7 +107,7 @@ define duplicacy::storage (
   }
 
   # Process chunk arguments
-  if !empty($chunk_parameters) {
+  if $chunk_parameters {
     # Default the size to 4 MiB
     if 'size' in $chunk_parameters {
       $chunk_size = $chunk_parameters['size']

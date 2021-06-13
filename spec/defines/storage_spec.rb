@@ -1,29 +1,6 @@
 require 'spec_helper'
 
 describe 'duplicacy::storage' do
-  # Test malformed encryption stanza
-  context 'encryption set without password' do
-    let(:title) { 'other_bucket' }
-    let(:params) do
-      {
-        'storage_name' => 'other_bucket',
-        'repo_id' => 'test_repo',
-        'repo_path' => '/my/super/safe/data',
-        'user' => 'me',
-        'target' => {
-          'url' => 'b2://test-storage',
-          'b2_id' => 'this-is-my-accound-id',
-          'b2_app_key' => 'this-is-my-key',
-        },
-        'encryption' => {
-          iterations: 7000,
-        },
-      }
-    end
-
-    it { is_expected.to raise_error(Puppet::PreformattedError, %r{Password mandatory when encryption is enabled!}) }
-  end
-
   # Test that unsupported characters cause an error
   context 'valid using default values' do
     let(:title) { 'my-repo_default' }
@@ -45,94 +22,6 @@ describe 'duplicacy::storage' do
     end
 
     it { is_expected.to raise_error(Puppet::PreformattedError, %r{Password includes unsupported character '}) }
-  end
-
-  # Test target not specified
-  context 'missing target' do
-    let(:title) { 'other_bucket' }
-    let(:params) do
-      {
-        'storage_name' => 'other_bucket',
-        'repo_id' => 'test_repo',
-        'repo_path' => '/my/super/safe/data',
-        'user' => 'me',
-      }
-    end
-
-    it { is_expected.to raise_error(Puppet::PreformattedError, %r{\$target is mandatory!}) }
-  end
-
-  # Test target url not specified
-  context 'missing url' do
-    let(:title) { 'other_bucket' }
-    let(:params) do
-      {
-        'storage_name' => 'other_bucket',
-        'repo_id' => 'test_repo',
-        'repo_path' => '/my/super/safe/data',
-        'user' => 'me',
-        'target' => {
-          b2_id: 'this should be the url',
-        },
-      }
-    end
-
-    it { is_expected.to raise_error(Puppet::PreformattedError, %r{\$target is mandatory!}) }
-  end
-
-  # Test unsupported backend
-  context 'unsupported backend' do
-    let(:title) { 'other_bucket' }
-    let(:params) do
-      {
-        'storage_name' => 'other_bucket',
-        'repo_id' => 'test_repo',
-        'repo_path' => '/my/super/safe/data',
-        'user' => 'me',
-        'target' => {
-          'url' => 'b3://this-isnt-a-thing',
-        },
-      }
-    end
-
-    it { is_expected.to raise_error(Puppet::PreformattedError, %r{Unrecognized url: }) }
-  end
-
-  # Test missing b2 data
-  context 'b2 missing account_id' do
-    let(:title) { 'other_bucket' }
-    let(:params) do
-      {
-        'storage_name' => 'other_bucket',
-        'repo_id' => 'test_repo',
-        'repo_path' => '/my/super/safe/data',
-        'user' => 'me',
-        'target' => {
-          'url' => 'b2://no-params',
-          'b2_app_key' => 'not-enough',
-        },
-      }
-    end
-
-    it { is_expected.to raise_error(Puppet::PreformattedError, %r{\$b2_id is mandatory for }) }
-  end
-
-  context 'b2 missing application_key' do
-    let(:title) { 'other_bucket' }
-    let(:params) do
-      {
-        'storage_name' => 'other_bucket',
-        'repo_id' => 'test_repo',
-        'repo_path' => '/my/super/safe/data',
-        'user' => 'me',
-        'target' => {
-          'url' => 'b2://no-params',
-          'b2_id' => 'not-enough',
-        },
-      }
-    end
-
-    it { is_expected.to raise_error(Puppet::PreformattedError, %r{\$b2_app_key is mandatory for }) }
   end
 
   context 'b2 alt storage without encryption' do
@@ -274,7 +163,7 @@ export DUPLICACY_PASSWORD="secret-sauce"
         },
         'encryption' => {
           'password' => 'secret-sauce',
-          'iterations' => '32768',
+          'iterations' => 32_768,
         },
         'chunk_parameters' => {
           'size' => 4_194_304,
@@ -285,13 +174,14 @@ export DUPLICACY_PASSWORD="secret-sauce"
     end
 
     # Ensure it compiles
-    it { is_expected.to compile.with_all_deps }
+    it 'compiles' do
+      is_expected.to compile.with_all_deps
+    end
 
     log_dir = '.duplicacy/puppet/logs'
     base_command = 'duplicacy init -e -iterations 32768 -c 4194304 -max 16777216 -min 1048576'
 
-    # Validate the command
-    it {
+    it 'builds a valid command' do
       is_expected.to contain_exec('init_my-repo').with(
         command: "#{base_command} #{params['repo_id']} b2://test-storage > \
     #{params['repo_path']}/#{log_dir}/#{params['repo_id']}_init.log",
@@ -303,7 +193,7 @@ export DUPLICACY_PASSWORD="secret-sauce"
           "DUPLICACY_B2_KEY=#{params['target']['b2_app_key']}",
         ],
       )
-    }
+    end
   end
 
   # Only size is specified

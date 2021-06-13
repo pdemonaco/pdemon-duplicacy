@@ -1,8 +1,5 @@
-type Duplicacy::StorageChunkParams = Hash[
-  Enum[
-    'size',
-    'max',
-    'min',
-  ],
-  Integer,
+type Duplicacy::StorageChunkParams = Struct[
+  Optional[size] => Integer,
+  Optional[max]  => Integer,
+  Optional[min]  => Integer,
 ]
