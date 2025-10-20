@@ -120,8 +120,8 @@ define duplicacy::prune (
   Boolean $exhaustive                                    = false,
   String $pref_dir                                       = "${repo_path}/.duplicacy",
   Array[Duplicacy::KeepRange] $keep_ranges               = [],
-  Optional[Array[String]] $backup_tags                   = [],
-  Optional[Integer] $threads                             = 1,
+  Array[String] $backup_tags                             = [],
+  Integer $threads                                       = 1,
   Optional[Duplicacy::EmailRecipient] $email_recipient   = undef,
 ) {
   # Ensure that a cron schedule was actually provided

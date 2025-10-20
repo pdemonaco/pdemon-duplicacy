@@ -103,13 +103,13 @@
 #   resource.
 define duplicacy::repository (
   String[1] $repo_path,
-  Duplicacy::SnapshotID $repo_id                                      = $name,
-  String[1] $user                                                     = 'root',
-  Hash[String, Duplicacy::StorageTarget] $storage_targets             = {},
-  Optional[Hash[String, Duplicacy::BackupSchedule]] $backup_schedules = {},
-  Optional[Hash[String, Duplicacy::PruneSchedule]] $prune_schedules   = {},
-  Optional[Array[String]] $filter_rules                               = [],
-  Optional[String] $log_retention                                     = '4w',
+  Duplicacy::SnapshotID $repo_id                            = $name,
+  String[1] $user                                           = 'root',
+  Hash[String, Duplicacy::StorageTarget] $storage_targets   = {},
+  Hash[String, Duplicacy::BackupSchedule] $backup_schedules = {},
+  Hash[String, Duplicacy::PruneSchedule] $prune_schedules   = {},
+  Array[String] $filter_rules                               = [],
+  String $log_retention                                     = '4w',
 ) {
   # TODO - actually really support alternate pref_dirs
   $pref_dir = "${repo_path}/.duplicacy"
@@ -145,11 +145,11 @@ define duplicacy::repository (
     require => File["${pref_dir}/puppet"],
     ;
     "${pref_dir}/puppet/logs":
-    ;
+      ;
     "${pref_dir}/puppet/locks":
-    ;
+      ;
     "${pref_dir}/puppet/scripts":
-    ;
+      ;
   }
 
   # Create the log parsing script

@@ -78,15 +78,14 @@ define duplicacy::backup (
   String[1] $storage_name,
   String[1] $repo_path,
   String[1] $user,
+  String $pref_dir           = "${repo_path}/.duplicacy",
+  Integer $threads           = 1,
+  Boolean $hash_mode         = false,
   Duplicacy::ScheduleEntry $cron_entry = {},
-  Optional[String] $pref_dir           = "${repo_path}/.duplicacy",
   Optional[String] $backup_tag         = undef,
-  Optional[Integer] $threads           = 1,
-  Optional[Boolean] $hash_mode         = false,
   Optional[Integer] $limit_rate        = undef,
   Optional[String] $email_recipient    = undef,
 ) {
-
   # Check if the mail recipient is valid
   if $email_recipient and $email_recipient !~ /[[:alnum:]._%+-]+@[[:alnum:].-]+\.[[:alnum:]]{2,}/ {
     fail("Invalid email address: ${email_recipient}")

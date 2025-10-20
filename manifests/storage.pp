@@ -86,7 +86,7 @@ define duplicacy::storage (
     # Extract the password, this is mandatory
     if 'password' in $encryption {
       $password = $encryption['password']
-      $env_encryption = [ "${env_prefix}_PASSWORD=${password}" ]
+      $env_encryption = ["${env_prefix}_PASSWORD=${password}"]
       if $password =~ /(["'])/ {
         fail("Storage '${storage_name}': Password includes unsupported character ${1}")
       }
