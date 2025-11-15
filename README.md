@@ -1,6 +1,6 @@
 # duplicacy
 
-[![pipeline status](https://gitlab.com/pdemon/pdemon-duplicacy/badges/master/pipeline.svg)](https://gitlab.com/pdemon/pdemon-duplicacy/commits/master)
+[![CI](https://github.com/pdemonaco/pdemon-duplicacy/actions/workflows/50_pdk.yml/badge.svg?branch=master)](https://github.com/pdemonaco/pdemon-duplicacy/actions/workflows/50_pdk.yml)
 
 #### Table of Contents
 
