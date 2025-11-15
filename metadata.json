@@ -1,6 +1,6 @@
 {
   "name": "pdemon-duplicacy",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "author": "Phil DeMonaco",
   "summary": "Module to manage duplicacy backups.",
   "license": "MIT",
@@ -10,7 +10,7 @@
   "dependencies": [
     {
       "name": "puppetlabs/stdlib",
-      "version_requirement": ">= 5.0 < 9.0.0"
+      "version_requirement": ">= 5.0 < 10.0.0"
     },
     {
       "name": "puppetlabs/cron_core",
