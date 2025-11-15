@@ -64,11 +64,19 @@ describe 'duplicacy' do
         }
       end
 
-      context 'compiles and installs packages' do
-        it { is_expected.to compile }
+      it 'compiles' do
+        is_expected.to compile.with_all_deps
+      end
 
-        it { is_expected.to contain_package('app-backup/duplicacy-bin') }
-        it { is_expected.to contain_package('mail-client/mutt') }
+      package_list = if os.include?('gentoo')
+                       ['app-backup/duplicacy-bin', 'mail-client/mutt']
+                     else
+                       ['duplicacy', 'mutt']
+                     end
+      package_list.each do |package|
+        it "installs #{package}" do
+          is_expected.to contain_package(package)
+        end
       end
 
       context 'Skipping undefined repo' do

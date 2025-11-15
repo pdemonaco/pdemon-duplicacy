@@ -1,6 +1,6 @@
 {
   "name": "pdemon-duplicacy",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "author": "Phil DeMonaco",
   "summary": "Module to manage duplicacy backups.",
   "license": "MIT",
@@ -10,7 +10,7 @@
   "dependencies": [
     {
       "name": "puppetlabs/stdlib",
-      "version_requirement": ">= 5.0 < 6.0.0"
+      "version_requirement": ">= 5.0 < 10.0.0"
     },
     {
       "name": "puppetlabs/cron_core",
@@ -19,20 +19,28 @@
   ],
   "operatingsystem_support": [
     {
+      "operatingsystem": "RedHat",
+      "operatingsystemrelease": [
+        "7",
+        "8",
+        "9"
+      ]
+    },
+    {
       "operatingsystem": "Gentoo"
     }
   ],
   "requirements": [
     {
       "name": "puppet",
-      "version_requirement": ">= 5.0.0 < 7.0.0"
+      "version_requirement": ">= 6.21.0 < 9.0.0"
     }
   ],
   "tags": [
     "duplicacy",
     "backups"
   ],
-  "pdk-version": "1.9.0",
-  "template-url": "file:///opt/puppetlabs/pdk/share/cache/pdk-templates.git",
-  "template-ref": "1.9.0-0-g7281db5"
+  "pdk-version": "3.4.0",
+  "template-url": "pdk-default#3.4.0",
+  "template-ref": "tags/3.4.0-0-gd3cc13f"
 }

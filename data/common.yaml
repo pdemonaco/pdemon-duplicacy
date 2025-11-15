@@ -1,6 +1,6 @@
 ---
-duplicacy::package_name: [ 'duplicacy' ]
-duplicacy::mail_package_name: [ 'mutt' ]
+duplicacy::package_name: 'duplicacy'
+duplicacy::mail_package_name: 'mutt'
 
 lookup_options:
   duplicacy::repos:

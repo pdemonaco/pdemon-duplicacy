@@ -27,7 +27,7 @@
 #   An array of strings which each correspond to a line of the filter file. See
 #   the https://github.com/gilbertchen/duplicacy/wiki/Include-Exclude-Patterns
 #   page for more detail.
-define duplicacy::filter(
+define duplicacy::filter (
   Stdlib::Absolutepath $pref_dir,
   String[1] $user,
   Array[String] $rules = [],

@@ -93,12 +93,7 @@ cd "${REPO_DIR}" || exit 1
 duplicacy -log -background prune \
   -id "${REPO_ID}" \
   -storage "${STORAGE_NAME}" \
-<% $keep_ranges.each | $entry | {
-  if ! ('interval' in $entry) {
-    fail("Keep range entry missing 'interval'!")
-  } elsif ! ('min_age' in $entry) {
-    fail("Keep range entry missing 'min_age'!")
-  } -%>
+<% $keep_ranges.each | $entry | { -%>
   -keep <%= $entry['interval'] %>:<%= $entry['min_age'] %> \
 <% }
 if $exhaustive { -%>

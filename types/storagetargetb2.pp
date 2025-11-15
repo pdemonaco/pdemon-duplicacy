@@ -5,14 +5,8 @@
 # b2 specific arguments
 # * `b2_id` - ID from your b2 account
 # * `b2_app_key` - the application key you generated for this bucket
-type Duplicacy::StorageTargetB2 = Hash[
-  Enum[
-    'url',
-    'b2_id',
-    'b2_app_key',
-  ],
-  Variant[
-    String,
-    Duplicacy::B2Url,
-  ],
+type Duplicacy::StorageTargetB2 = Struct[
+  url        => Duplicacy::B2Url,
+  b2_id      => String,
+  b2_app_key => String,
 ]

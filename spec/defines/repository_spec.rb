@@ -21,8 +21,20 @@ describe 'duplicacy::repository' do
       {
         repo_path: '/my/backup/dir',
         storage_targets: {
-          'storage1' => {},
-          'storage2' => {},
+          'storage1' => {
+            target: {
+              url: 'b2://my-bucket',
+              'b2_id' => 'my-id',
+              'b2_app_key' => 'my-key',
+            },
+          },
+          'storage2' => {
+            target: {
+              url: 'b2://myother-bucket',
+              'b2_id' => 'my-id',
+              'b2_app_key' => 'my-key',
+            },
+          },
         },
       }
     end

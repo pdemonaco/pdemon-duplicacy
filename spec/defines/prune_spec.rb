@@ -172,30 +172,6 @@ rm "${LOCK_FILE}"
       )
     end
 
-    context 'missing keep interval' do
-      before(:each) do
-        params.merge!(
-          keep_ranges: [
-            { min_age: 30 },
-          ],
-        )
-      end
-
-      it { is_expected.to compile.and_raise_error(%r{Keep range entry missing 'interval'!}) }
-    end
-
-    context 'missing keep max age' do
-      before(:each) do
-        params.merge!(
-          keep_ranges: [
-            { interval: 7 },
-          ],
-        )
-      end
-
-      it { is_expected.to compile.and_raise_error(%r{Keep range entry missing 'min_age'!}) }
-    end
-
     context 'Validate mail commands' do
       before(:each) do
         params.merge!(

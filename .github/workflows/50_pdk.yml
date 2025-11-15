@@ -1,0 +1,41 @@
+name: 50 - PDK-Validation-and-Linting
+
+on:
+  push:
+    branches-ignore:
+      - main
+      - master
+    tags:
+      - '*'
+  pull_request:
+    branches:
+      - main
+      - master
+    types:
+      - closed
+
+jobs:
+  syntax:
+    name: 50 - 1 - Syntax Validation
+    runs-on: ubuntu-latest
+    if: github.event_name != 'pull_request' || github.event.pull_request.merged == true
+    container:
+      image: puppet/pdk:latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Validate syntax and metadata
+        run: pdk validate
+
+  unit:
+    name: 50 - 2 - Unit Tests
+    runs-on: ubuntu-latest
+    needs: syntax
+    if: github.event_name != 'pull_request' || github.event.pull_request.merged == true
+    container:
+      image: puppet/pdk:latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Run unit test suite
+        run: pdk test unit

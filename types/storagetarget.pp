@@ -1,12 +1,6 @@
-type Duplicacy::StorageTarget = Hash[
-  Enum[
-    'target',
-    'encryption',
-    'chunk_parameters',
-  ],
-  Variant[
-    Duplicacy::StorageTargetType,
-    Duplicacy::StorageEncryption,
-    Duplicacy::StorageChunkParams,
-  ],
+# @summary A specific backend storage for the current repository
+type Duplicacy::StorageTarget = Struct[
+  target                     => Duplicacy::StorageTargetType,
+  Optional[encryption]       => Duplicacy::StorageEncryption,
+  Optional[chunk_parameters] => Duplicacy::StorageChunkParams,
 ]
