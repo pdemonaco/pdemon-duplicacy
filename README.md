@@ -15,7 +15,7 @@
 
 ## Description
 
-The duplicacy module installs, configures, and manages duplicacy backups. [Duplicacy](https://duplicacy.com/) is backup application written by Gilbert Chen which supports a wide variety of storage backends. 
+The duplicacy module installs, configures, and manages duplicacy backups. [Duplicacy](https://duplicacy.com/) is backup application written by Gilbert Chen which supports a wide variety of storage backends.
 
 ## Setup
 
@@ -29,20 +29,22 @@ By default, an attempt will be made to install the duplicacy package and a simpl
 
 #### 2 - Crontab Entries
 
-If a backup schedule or prune schedule is configured this will result in the creation of crontab entries for either `root` or the user specified for the target repository. 
+If a backup schedule or prune schedule is configured this will result in the creation of crontab entries for either `root` or the user specified for the target repository.
 
 #### 3 - Configuration
 
 Each repository you define and include on a machine via `duplicacy::local_repos` will result in the creation of a `.duplicacy` folder within the repo_path for that repository. The repository will be initialized to the provided `default` storage target and a series of scripts will be created within that `.duplicacy/puppet/`.
 
 In addition to scripts, that directory will contain a few useful files
-* `.duplicacy/puppet/locks` - whenever a job is executing for this repository against a storage backend it will create a lock file matching that repo. 
+
+* `.duplicacy/puppet/locks` - whenever a job is executing for this repository against a storage backend it will create a lock file matching that repo.
 * `.duplicacy/puppet/logs` - contains log files for each job run against this repository. By default these are retained for 5 weeks
 * `.duplicacy/puppet/scripts` - contains an environment file for each storage defined against this repository as well as a backup/prune script for each scheduled job
 
 ### Setup Requirements
 
 A few outside setup requirements currently exist:
+
 1. Ensure you have working smtp if you'd like email notifications.
 2. If you're running on Gentoo you can use my overlay to install Duplicacy, otherwise, you'll need to get duplicacy installed via some other means.
 3. I **STRONGLY** recommend that you use encrypted yaml files for managing these configs. Otherwise, your puppet manifest will contain passwords in plain text! See the [hiera-eyaml](https://github.com/voxpupuli/hiera-eyaml) project for more detail.
@@ -172,7 +174,8 @@ duplicacy::local_repos:
 ## Limitations
 
 Testing has been limited at this point. A few call-outs worth noting:
-* There is no official ebuild for duplicacy. I have a binary distribution based ebuild on my personal overlay [here](https://github.com/pdemonaco/overlay/tree/master/app-backup/duplicacy-bin).
+
+* There is no official ebuild for duplicacy. I have a binary distribution based ebuild on my [personal overlay](https://github.com/pdemonaco/overlay/tree/master/app-backup/duplicacy-bin).
 * This module is currently limited to the b2 backend.
 * I've only tested this on my personal home environment using the b2 (Backblaze) backend. As of this writing this consists entirely of Gentoo machines running duplicacy 2.1.1.
 * Currently it assumes your machine is capable of sending outbound mail. I'm planning to build a separate module for managing a simple smtp engine in the future.
@@ -181,8 +184,9 @@ Testing has been limited at this point. A few call-outs worth noting:
 ## Development
 
 If you'd like to make changes submit a pull request! Here's a few basic ground rules:
+
 * Ensure that your changes pass the PDK validation and unit tests before submitting.
-* When adding new functionality expand the existing test cases as necessary to ensure your code is covered. 
+* When adding new functionality expand the existing test cases as necessary to ensure your code is covered.
 
 ## Contributors
 

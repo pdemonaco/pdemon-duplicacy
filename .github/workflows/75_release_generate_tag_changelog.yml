@@ -2,7 +2,6 @@ name: 75 - Release - Generate Tag & Changelog
 
 on:
   workflow_dispatch:
-
 jobs:
   release:
     name: 75 - Release - Generate Tag & Changelog
@@ -37,6 +36,9 @@ jobs:
           bundle config set --local without 'system_tests'
           bundle config set --local with 'development release_prep'
           bundle install --jobs 4 --retry 3
+
+      - name: Generate REFERENCE.md
+        run: bundle exec rake strings:generate:reference
 
       - name: Generate changelog
         env:
