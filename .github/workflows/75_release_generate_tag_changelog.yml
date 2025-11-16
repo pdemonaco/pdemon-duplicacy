@@ -24,7 +24,7 @@ jobs:
             exit 1
           fi
           echo "RELEASE_VERSION=${version}" >> "${GITHUB_ENV}"
-          echo "RELEASE_TAG=v${version}" >> "${GITHUB_ENV}"
+          echo "RELEASE_TAG=${version}" >> "${GITHUB_ENV}"
 
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
@@ -38,7 +38,12 @@ jobs:
           bundle install --jobs 4 --retry 3
 
       - name: Generate REFERENCE.md
-        run: bundle exec rake strings:generate:reference
+        run: |
+          bundle exec rake strings:generate:reference
+          if [ -n "$(git status --porcelain REFERENCE.md)" ]; then
+            git add REFERENCE.md
+            git commit -m "docs(reference): update REFERENCE.md"
+          fi
 
       - name: Generate changelog
         env:
