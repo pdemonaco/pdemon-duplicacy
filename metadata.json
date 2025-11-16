@@ -1,6 +1,6 @@
 {
   "name": "pdemon-duplicacy",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "author": "Phil DeMonaco",
   "summary": "Module to manage duplicacy backups.",
   "license": "MIT",
