@@ -40,6 +40,8 @@ jobs:
       - name: Generate REFERENCE.md
         run: |
           bundle exec rake strings:generate:reference
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           if [ -n "$(git status --porcelain REFERENCE.md)" ]; then
             git add REFERENCE.md
             git commit -m "docs(reference): update REFERENCE.md"
