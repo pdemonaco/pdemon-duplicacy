@@ -51,7 +51,7 @@ describe 'duplicacy::storage' do
         command: %r{#{base_command} other_bucket my-repo b2://no-params > \
     #{params['repo_path']}/#{log_dir}/my-repo_init.log},
         cwd: params['repo_path'],
-        path: '/usr/local/bin:/usr/bin:/bin',
+        path: '/usr/local/sbin:/usr/local/bin:/usr/bin:/bin',
         environment: [
           "DUPLICACY_OTHER_BUCKET_B2_ID=#{params['target']['b2_id']}",
           "DUPLICACY_OTHER_BUCKET_B2_KEY=#{params['target']['b2_app_key']}",
@@ -186,7 +186,7 @@ export DUPLICACY_PASSWORD="secret-sauce"
         command: "#{base_command} #{params['repo_id']} b2://test-storage > \
     #{params['repo_path']}/#{log_dir}/#{params['repo_id']}_init.log",
         cwd: params['repo_path'],
-        path: '/usr/local/bin:/usr/bin:/bin',
+        path: '/usr/local/sbin:/usr/local/bin:/usr/bin:/bin',
         environment: [
           "DUPLICACY_PASSWORD=#{params['encryption']['password']}",
           "DUPLICACY_B2_ID=#{params['target']['b2_id']}",
@@ -231,7 +231,7 @@ export DUPLICACY_PASSWORD="secret-sauce"
         command: "#{base_command} my-repo b2://test-storage > \
     #{params['repo_path']}/#{log_dir}/my-repo_init.log",
         cwd: params['repo_path'],
-        path: '/usr/local/bin:/usr/bin:/bin',
+        path: '/usr/local/sbin:/usr/local/bin:/usr/bin:/bin',
         environment: [
           "DUPLICACY_PASSWORD=#{params['encryption']['password']}",
           "DUPLICACY_B2_ID=#{params['target']['b2_id']}",

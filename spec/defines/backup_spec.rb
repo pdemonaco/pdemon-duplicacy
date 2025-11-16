@@ -74,7 +74,7 @@ describe 'duplicacy::backup' do
         [
           '#!/bin/sh
 #==== Constants
-PATH="/usr/local/bin:/usr/bin:/bin"
+PATH="/usr/local/sbin:/usr/local/bin:/usr/bin:/bin"
 STORAGE_NAME="default"
 JOB_NAME="my-repo_default_daily-0130"
 TIMESTAMP=$(date +%Y-%m-%d_%H%M%S)

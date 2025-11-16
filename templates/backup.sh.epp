@@ -10,7 +10,7 @@
 | -%>
 #!/bin/sh
 #==== Constants
-PATH="/usr/local/bin:/usr/bin:/bin"
+PATH="/usr/local/sbin:/usr/local/bin:/usr/bin:/bin"
 STORAGE_NAME="<%= $storage_name %>"
 JOB_NAME="<%= $backup_name %>"
 TIMESTAMP=$(date +%Y-%m-%d_%H%M%S)

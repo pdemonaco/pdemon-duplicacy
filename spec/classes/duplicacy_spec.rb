@@ -79,6 +79,18 @@ describe 'duplicacy' do
         end
       end
 
+      context 'Package management disabled' do
+        let(:params) do
+          super().merge(manage_packages: false)
+        end
+
+        package_list.each do |package|
+          it {
+            is_expected.not_to contain_package(package)
+          }
+        end
+      end
+
       context 'Skipping undefined repo' do
         let(:params) do
           super().merge(local_repos: ['missing-repo'])
