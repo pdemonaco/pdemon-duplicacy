@@ -78,7 +78,7 @@ describe 'duplicacy::prune' do
         content: [
           '#!/bin/bash
 #==== Constants
-PATH="/usr/local/bin:/usr/bin:/bin"
+PATH="/usr/local/sbin:/usr/local/bin:/usr/bin:/bin"
 TIMESTAMP=$(date +%Y-%m-%d_%H%M%S)
 
 # Paths

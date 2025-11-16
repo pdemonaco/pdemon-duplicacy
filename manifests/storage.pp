@@ -203,7 +203,7 @@ define duplicacy::storage (
     $repo_init_command = "${cmd_base}${cmd_encryption}${cmd_chunks}${cmd_args}"
     exec { "init_${repo_id}":
       command     => "${repo_init_command}${cmd_log_args}",
-      path        => '/usr/local/bin:/usr/bin:/bin',
+      path        => '/usr/local/sbin:/usr/local/bin:/usr/bin:/bin',
       cwd         => $repo_path,
       creates     => "${repo_path}/.duplicacy/preferences",
       environment => $env,
@@ -221,7 +221,7 @@ define duplicacy::storage (
       |-EOT
     exec { "add_${repo_id}_${storage_name}":
       command     => "${repo_add_command}${cmd_log_args}",
-      path        => '/usr/local/bin:/usr/bin:/bin',
+      path        => '/usr/local/sbin:/usr/local/bin:/usr/bin:/bin',
       cwd         => $repo_path,
       environment => $env,
       onlyif      => [
