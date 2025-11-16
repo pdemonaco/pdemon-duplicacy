@@ -70,20 +70,26 @@
 #   A Hash where the keys are the names of the repositories to be deployed on
 #   this system are stored. This is a very deep structure.
 #
+# @param manage_packages
+#   Whether to manage the installation of the duplicacy and mail packages.
+#
 class duplicacy (
   String $package_name,
   String $mail_package_name,
   Array[String] $local_repos,
+  Boolean $manage_packages = true,
   Hash[Duplicacy::SnapshotID, Duplicacy::RepositoryEntry] $repos = {},
 ) {
-  # Ensure the duplicacy package is present
-  package { $duplicacy::package_name:
-    ensure => present,
-  }
+  if $manage_packages {
+    # Ensure the duplicacy package is present
+    package { $duplicacy::package_name:
+      ensure => present,
+    }
 
-  # Ensure the mail client is present (mutt)
-  package { $duplicacy::mail_package_name:
-    ensure => present,
+    # Ensure the mail client is present (mutt)
+    package { $duplicacy::mail_package_name:
+      ensure => present,
+    }
   }
 
   # Create repositories
