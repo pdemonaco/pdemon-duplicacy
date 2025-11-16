@@ -10,28 +10,28 @@
 
 ### Defined types
 
-* [`duplicacy::backup`](#duplicacybackup): Generates a script & schedules it given the specified parameters
-* [`duplicacy::filter`](#duplicacyfilter): Creates a filters file for this repository.
-* [`duplicacy::prune`](#duplicacyprune): Generates a script & schedules it given the specified parameters
-* [`duplicacy::repository`](#duplicacyrepository): A short summary of the purpose of this defined type.
-* [`duplicacy::storage`](#duplicacystorage): This initializes a storage backend for a particular duplicacy repository.
+* [`duplicacy::backup`](#duplicacy--backup): Generates a script & schedules it given the specified parameters
+* [`duplicacy::filter`](#duplicacy--filter): Creates a filters file for this repository.
+* [`duplicacy::prune`](#duplicacy--prune): Generates a script & schedules it given the specified parameters
+* [`duplicacy::repository`](#duplicacy--repository): A short summary of the purpose of this defined type.
+* [`duplicacy::storage`](#duplicacy--storage): This initializes a storage backend for a particular duplicacy repository.
 
 ### Data types
 
-* [`Duplicacy::B2Url`](#duplicacyb2url): Backblaze b2 url - currently the only supported target type
-* [`Duplicacy::BackupSchedule`](#duplicacybackupschedule): Backup schedule for a given storage target
-* [`Duplicacy::EmailRecipient`](#duplicacyemailrecipient): A valid email address
-* [`Duplicacy::KeepRange`](#duplicacykeeprange): Prune job parameters
-* [`Duplicacy::PruneSchedule`](#duplicacypruneschedule): Prune schedule entry
-* [`Duplicacy::PruneScheduleEntry`](#duplicacyprunescheduleentry): Schedule prune jobs against this or other repos in the same storage
-* [`Duplicacy::RepositoryEntry`](#duplicacyrepositoryentry): Configures a directory as a duplicacy backup repository
-* [`Duplicacy::ScheduleEntry`](#duplicacyscheduleentry): A basic alias for the cron resource type
-* [`Duplicacy::SnapshotID`](#duplicacysnapshotid): Name of the backup repository associated with this storage
-* [`Duplicacy::StorageChunkParams`](#duplicacystoragechunkparams): Configure the attributes of chunks for this storage target
-* [`Duplicacy::StorageEncryption`](#duplicacystorageencryption): Configure encryption for the given storage
-* [`Duplicacy::StorageTarget`](#duplicacystoragetarget): A specific backend storage for the current repository
-* [`Duplicacy::StorageTargetB2`](#duplicacystoragetargetb2): Hash containing a number of details for the target system. Currently only b2 is supported by this module. * 'url' - the url to provide to the
-* [`Duplicacy::StorageTargetType`](#duplicacystoragetargettype): Possible storage target types
+* [`Duplicacy::B2Url`](#Duplicacy--B2Url): Backblaze b2 url - currently the only supported target type
+* [`Duplicacy::BackupSchedule`](#Duplicacy--BackupSchedule): Backup schedule for a given storage target
+* [`Duplicacy::EmailRecipient`](#Duplicacy--EmailRecipient): A valid email address
+* [`Duplicacy::KeepRange`](#Duplicacy--KeepRange): Prune job parameters
+* [`Duplicacy::PruneSchedule`](#Duplicacy--PruneSchedule): Prune schedule entry
+* [`Duplicacy::PruneScheduleEntry`](#Duplicacy--PruneScheduleEntry): Schedule prune jobs against this or other repos in the same storage
+* [`Duplicacy::RepositoryEntry`](#Duplicacy--RepositoryEntry): Configures a directory as a duplicacy backup repository
+* [`Duplicacy::ScheduleEntry`](#Duplicacy--ScheduleEntry): A basic alias for the cron resource type
+* [`Duplicacy::SnapshotID`](#Duplicacy--SnapshotID): Name of the backup repository associated with this storage
+* [`Duplicacy::StorageChunkParams`](#Duplicacy--StorageChunkParams): Configure the attributes of chunks for this storage target
+* [`Duplicacy::StorageEncryption`](#Duplicacy--StorageEncryption): Configure encryption for the given storage
+* [`Duplicacy::StorageTarget`](#Duplicacy--StorageTarget): A specific backend storage for the current repository
+* [`Duplicacy::StorageTargetB2`](#Duplicacy--StorageTargetB2): Hash containing a number of details for the target system. Currently only b2 is supported by this module. * 'url' - the url to provide to the
+* [`Duplicacy::StorageTargetType`](#Duplicacy--StorageTargetType): Possible storage target types
 
 ## Classes
 
@@ -101,31 +101,32 @@ duplicacy {
 
 The following parameters are available in the `duplicacy` class:
 
-* [`package_name`](#package_name)
-* [`mail_package_name`](#mail_package_name)
-* [`local_repos`](#local_repos)
-* [`repos`](#repos)
+* [`package_name`](#-duplicacy--package_name)
+* [`mail_package_name`](#-duplicacy--mail_package_name)
+* [`local_repos`](#-duplicacy--local_repos)
+* [`repos`](#-duplicacy--repos)
+* [`manage_packages`](#-duplicacy--manage_packages)
 
-##### <a name="package_name"></a>`package_name`
+##### <a name="-duplicacy--package_name"></a>`package_name`
 
 Data type: `String`
 
 Package or list of packages needed to install duplicacy on this host.
 
-##### <a name="mail_package_name"></a>`mail_package_name`
+##### <a name="-duplicacy--mail_package_name"></a>`mail_package_name`
 
 Data type: `String`
 
 Package or list of packages needed to send email from this host.
 
-##### <a name="local_repos"></a>`local_repos`
+##### <a name="-duplicacy--local_repos"></a>`local_repos`
 
 Data type: `Array[String]`
 
 List of repo names which should be deployed on this machine. Note that
 each repo must be defined in the `repos` parameter.
 
-##### <a name="repos"></a>`repos`
+##### <a name="-duplicacy--repos"></a>`repos`
 
 Data type: `Hash[Duplicacy::SnapshotID, Duplicacy::RepositoryEntry]`
 
@@ -134,9 +135,17 @@ this system are stored. This is a very deep structure.
 
 Default value: `{}`
 
+##### <a name="-duplicacy--manage_packages"></a>`manage_packages`
+
+Data type: `Boolean`
+
+Whether to manage the installation of the duplicacy and mail packages.
+
+Default value: `true`
+
 ## Defined types
 
-### <a name="duplicacybackup"></a>`duplicacy::backup`
+### <a name="duplicacy--backup"></a>`duplicacy::backup`
 
 This define handles the creation of a single backup schedule for the target
 repository / storage combination. The schedule is carried out via a cron
@@ -182,39 +191,39 @@ duplicacy::backup { 'my-repo_minimal':
 
 The following parameters are available in the `duplicacy::backup` defined type:
 
-* [`storage_name`](#storage_name)
-* [`repo_path`](#repo_path)
-* [`user`](#user)
-* [`pref_dir`](#pref_dir)
-* [`cron_entry`](#cron_entry)
-* [`backup_tag`](#backup_tag)
-* [`threads`](#threads)
-* [`hash_mode`](#hash_mode)
-* [`limit_rate`](#limit_rate)
-* [`email_recipient`](#email_recipient)
+* [`storage_name`](#-duplicacy--backup--storage_name)
+* [`repo_path`](#-duplicacy--backup--repo_path)
+* [`user`](#-duplicacy--backup--user)
+* [`pref_dir`](#-duplicacy--backup--pref_dir)
+* [`cron_entry`](#-duplicacy--backup--cron_entry)
+* [`backup_tag`](#-duplicacy--backup--backup_tag)
+* [`threads`](#-duplicacy--backup--threads)
+* [`hash_mode`](#-duplicacy--backup--hash_mode)
+* [`limit_rate`](#-duplicacy--backup--limit_rate)
+* [`email_recipient`](#-duplicacy--backup--email_recipient)
 
-##### <a name="storage_name"></a>`storage_name`
+##### <a name="-duplicacy--backup--storage_name"></a>`storage_name`
 
 Data type: `String[1]`
 
 Name of this particular storage backend as referenced by duplicacy for this
 specific repository. Note that the backend named 'default' is the primary.
 
-##### <a name="repo_path"></a>`repo_path`
+##### <a name="-duplicacy--backup--repo_path"></a>`repo_path`
 
 Data type: `String[1]`
 
 Directory in which this particular repository resides on this machine.
 
-##### <a name="user"></a>`user`
+##### <a name="-duplicacy--backup--user"></a>`user`
 
 Data type: `String[1]`
 
 User to whom this repository belongs.
 
-##### <a name="pref_dir"></a>`pref_dir`
+##### <a name="-duplicacy--backup--pref_dir"></a>`pref_dir`
 
-Data type: `Optional[String]`
+Data type: `String`
 
 Directory containing the duplicacy preferences for this repository.
 Typically this is `${repo_path}/.duplicacy` however the application can
@@ -222,7 +231,7 @@ support alternate paths.
 
 Default value: `"${repo_path}/.duplicacy"`
 
-##### <a name="cron_entry"></a>`cron_entry`
+##### <a name="-duplicacy--backup--cron_entry"></a>`cron_entry`
 
 Data type: `Duplicacy::ScheduleEntry`
 
@@ -232,7 +241,7 @@ several parameters are overridden directly. In particular, `user` and
 
 Default value: `{}`
 
-##### <a name="backup_tag"></a>`backup_tag`
+##### <a name="-duplicacy--backup--backup_tag"></a>`backup_tag`
 
 Data type: `Optional[String]`
 
@@ -240,11 +249,11 @@ This string will be set as the tag argument for each backup performed by
 this job. These can be used by various duplicacy commands to filter to
 specific snapshots.
 
-Default value: ``undef``
+Default value: `undef`
 
-##### <a name="threads"></a>`threads`
+##### <a name="-duplicacy--backup--threads"></a>`threads`
 
-Data type: `Optional[Integer]`
+Data type: `Integer`
 
 Number of parallel execution threads which will be spawned for this backup.
 Note that this defaults to 1 and should not be greater than the number of
@@ -252,26 +261,26 @@ available threads on the target machine.
 
 Default value: `1`
 
-##### <a name="hash_mode"></a>`hash_mode`
+##### <a name="-duplicacy--backup--hash_mode"></a>`hash_mode`
 
-Data type: `Optional[Boolean]`
+Data type: `Boolean`
 
 Indicates whether a hash should be generated for each file to determine
 whether a change has occured. The alternate approach simply uses file size
 and modification timestamp. Note that this defaults to `false`.
 
-Default value: ``false``
+Default value: `false`
 
-##### <a name="limit_rate"></a>`limit_rate`
+##### <a name="-duplicacy--backup--limit_rate"></a>`limit_rate`
 
 Data type: `Optional[Integer]`
 
 Maximum upload data rate in kilobytes per second (KB/s). Note that leaving
 this unset implies no limit.
 
-Default value: ``undef``
+Default value: `undef`
 
-##### <a name="email_recipient"></a>`email_recipient`
+##### <a name="-duplicacy--backup--email_recipient"></a>`email_recipient`
 
 Data type: `Optional[String]`
 
@@ -279,9 +288,9 @@ If specified, the job log will be sent to the specified address.
 
 @note This assumes email is configured and working on this system.
 
-Default value: ``undef``
+Default value: `undef`
 
-### <a name="duplicacyfilter"></a>`duplicacy::filter`
+### <a name="duplicacy--filter"></a>`duplicacy::filter`
 
 This type takes an ordered list of duplicity filter rules and inserts them
 into the filters file for a specific repository. For more detail on the filter
@@ -307,25 +316,25 @@ duplicacy::filter { 'my-repo_filters':
 
 The following parameters are available in the `duplicacy::filter` defined type:
 
-* [`pref_dir`](#pref_dir)
-* [`user`](#user)
-* [`rules`](#rules)
+* [`pref_dir`](#-duplicacy--filter--pref_dir)
+* [`user`](#-duplicacy--filter--user)
+* [`rules`](#-duplicacy--filter--rules)
 
-##### <a name="pref_dir"></a>`pref_dir`
+##### <a name="-duplicacy--filter--pref_dir"></a>`pref_dir`
 
 Data type: `Stdlib::Absolutepath`
 
 Path to the '.duplicacy' directory in which this filters file should be
 defined.
 
-##### <a name="user"></a>`user`
+##### <a name="-duplicacy--filter--user"></a>`user`
 
 Data type: `String[1]`
 
 Who should own this file? Typically this is also who runs the backups and
 owns the associated data.
 
-##### <a name="rules"></a>`rules`
+##### <a name="-duplicacy--filter--rules"></a>`rules`
 
 Data type: `Array[String]`
 
@@ -335,7 +344,7 @@ page for more detail.
 
 Default value: `[]`
 
-### <a name="duplicacyprune"></a>`duplicacy::prune`
+### <a name="duplicacy--prune"></a>`duplicacy::prune`
 
 This define handles the creation of a single backup schedule for the target
 repository / storage combination. The schedule is carried out via a cron
@@ -408,30 +417,30 @@ duplicacy::backup { 'my-repo_minimal':
 
 The following parameters are available in the `duplicacy::prune` defined type:
 
-* [`repo_path`](#repo_path)
-* [`user`](#user)
-* [`pref_dir`](#pref_dir)
-* [`schedules`](#schedules)
-* [`backup_tags`](#backup_tags)
-* [`keep_ranges`](#keep_ranges)
-* [`exhaustive`](#exhaustive)
-* [`threads`](#threads)
-* [`email_recipient`](#email_recipient)
-* [`default_id`](#default_id)
+* [`repo_path`](#-duplicacy--prune--repo_path)
+* [`user`](#-duplicacy--prune--user)
+* [`pref_dir`](#-duplicacy--prune--pref_dir)
+* [`schedules`](#-duplicacy--prune--schedules)
+* [`backup_tags`](#-duplicacy--prune--backup_tags)
+* [`keep_ranges`](#-duplicacy--prune--keep_ranges)
+* [`exhaustive`](#-duplicacy--prune--exhaustive)
+* [`threads`](#-duplicacy--prune--threads)
+* [`email_recipient`](#-duplicacy--prune--email_recipient)
+* [`default_id`](#-duplicacy--prune--default_id)
 
-##### <a name="repo_path"></a>`repo_path`
+##### <a name="-duplicacy--prune--repo_path"></a>`repo_path`
 
 Data type: `String[1]`
 
 Directory in which this particular repository resides on this machine.
 
-##### <a name="user"></a>`user`
+##### <a name="-duplicacy--prune--user"></a>`user`
 
 Data type: `String[1]`
 
 User to whom this repository belongs.
 
-##### <a name="pref_dir"></a>`pref_dir`
+##### <a name="-duplicacy--prune--pref_dir"></a>`pref_dir`
 
 Data type: `String`
 
@@ -441,7 +450,7 @@ support alternate paths.
 
 Default value: `"${repo_path}/.duplicacy"`
 
-##### <a name="schedules"></a>`schedules`
+##### <a name="-duplicacy--prune--schedules"></a>`schedules`
 
 Data type: `Hash[String, Duplicacy::PruneScheduleEntry]`
 
@@ -460,15 +469,15 @@ Additionally, the following optional parameter can be included
 
 Default value: `{}`
 
-##### <a name="backup_tags"></a>`backup_tags`
+##### <a name="-duplicacy--prune--backup_tags"></a>`backup_tags`
 
-Data type: `Optional[Array[String]]`
+Data type: `Array[String]`
 
 Limit the prune to impact only backups matching the specified tag or tags.
 
 Default value: `[]`
 
-##### <a name="keep_ranges"></a>`keep_ranges`
+##### <a name="-duplicacy--prune--keep_ranges"></a>`keep_ranges`
 
 Data type: `Array[Duplicacy::KeepRange]`
 
@@ -481,18 +490,18 @@ doesn't do this for you at the moment!
 
 Default value: `[]`
 
-##### <a name="exhaustive"></a>`exhaustive`
+##### <a name="-duplicacy--prune--exhaustive"></a>`exhaustive`
 
 Data type: `Boolean`
 
 If this is enabled prune will remove unreferenced chunks created by other
 scenarios as well as files which don't appear to be backup chunks.
 
-Default value: ``false``
+Default value: `false`
 
-##### <a name="threads"></a>`threads`
+##### <a name="-duplicacy--prune--threads"></a>`threads`
 
-Data type: `Optional[Integer]`
+Data type: `Integer`
 
 Number of parallel execution threads which will be spawned for this backup.
 Note that this defaults to 1 and should not be greater than the number of
@@ -500,15 +509,15 @@ available threads on the target machine.
 
 Default value: `1`
 
-##### <a name="email_recipient"></a>`email_recipient`
+##### <a name="-duplicacy--prune--email_recipient"></a>`email_recipient`
 
 Data type: `Optional[Duplicacy::EmailRecipient]`
 
 If specified, the job log will be sent to the specified address.
 
-Default value: ``undef``
+Default value: `undef`
 
-##### <a name="default_id"></a>`default_id`
+##### <a name="-duplicacy--prune--default_id"></a>`default_id`
 
 Data type: `String[1]`
 
@@ -517,7 +526,7 @@ out of a given prune schedule entry.
 
 @note This assumes email is configured and working on this system.
 
-### <a name="duplicacyrepository"></a>`duplicacy::repository`
+### <a name="duplicacy--repository"></a>`duplicacy::repository`
 
 Each entity of this type corresponds to a distinct repository for duplicacy to
 back up. These repositories can potentially share backing storage resources.
@@ -589,31 +598,31 @@ duplicacy::repository { 'my-repo':
 
 The following parameters are available in the `duplicacy::repository` defined type:
 
-* [`repo_id`](#repo_id)
-* [`repo_path`](#repo_path)
-* [`user`](#user)
-* [`storage_targets`](#storage_targets)
-* [`backup_schedules`](#backup_schedules)
-* [`prune_schedules`](#prune_schedules)
-* [`filter_rules`](#filter_rules)
-* [`log_retention`](#log_retention)
+* [`repo_id`](#-duplicacy--repository--repo_id)
+* [`repo_path`](#-duplicacy--repository--repo_path)
+* [`user`](#-duplicacy--repository--user)
+* [`storage_targets`](#-duplicacy--repository--storage_targets)
+* [`backup_schedules`](#-duplicacy--repository--backup_schedules)
+* [`prune_schedules`](#-duplicacy--repository--prune_schedules)
+* [`filter_rules`](#-duplicacy--repository--filter_rules)
+* [`log_retention`](#-duplicacy--repository--log_retention)
 
-##### <a name="repo_id"></a>`repo_id`
+##### <a name="-duplicacy--repository--repo_id"></a>`repo_id`
 
-Data type: `String[1]`
+Data type: `Duplicacy::SnapshotID`
 
 The name of this particular repository. This is a namevar.
 
 Default value: `$name`
 
-##### <a name="repo_path"></a>`repo_path`
+##### <a name="-duplicacy--repository--repo_path"></a>`repo_path`
 
 Data type: `String[1]`
 
 Absolute path to the directory to be backed up. Note that backup directories
 should not be nested.
 
-##### <a name="user"></a>`user`
+##### <a name="-duplicacy--repository--user"></a>`user`
 
 Data type: `String[1]`
 
@@ -622,7 +631,7 @@ will also run the cron jobs for that system. Defaults to 'root'.
 
 Default value: `'root'`
 
-##### <a name="storage_targets"></a>`storage_targets`
+##### <a name="-duplicacy--repository--storage_targets"></a>`storage_targets`
 
 Data type: `Hash[String, Duplicacy::StorageTarget]`
 
@@ -634,9 +643,9 @@ subtype must be omitted here. Specifically, `repo_id`, `repo_path`, and
 
 Default value: `{}`
 
-##### <a name="backup_schedules"></a>`backup_schedules`
+##### <a name="-duplicacy--repository--backup_schedules"></a>`backup_schedules`
 
-Data type: `Optional[Hash[String, Duplicacy::BackupSchedule]]`
+Data type: `Hash[String, Duplicacy::BackupSchedule]`
 
 Optional[Hash[String, Hash[String, Variant[String, Integer, Hash[String, Variant[String, Integer]]]]]]
 A list of parameters and schedules for the execution of a series of backups
@@ -647,9 +656,9 @@ backup this repository.
 
 Default value: `{}`
 
-##### <a name="prune_schedules"></a>`prune_schedules`
+##### <a name="-duplicacy--repository--prune_schedules"></a>`prune_schedules`
 
-Data type: `Optional[Hash[String, Duplicacy::PruneSchedule]]`
+Data type: `Hash[String, Duplicacy::PruneSchedule]`
 
 A list of parameters and schedules for the execution of a series of prunes
 of this repository. If no schedules are provided this machine will not
@@ -659,17 +668,17 @@ prune this repository.
 
 Default value: `{}`
 
-##### <a name="filter_rules"></a>`filter_rules`
+##### <a name="-duplicacy--repository--filter_rules"></a>`filter_rules`
 
-Data type: `Optional[Array[String]]`
+Data type: `Array[String]`
 
 An ordered list of valid include/exclude filters for duplicacy.
 
 Default value: `[]`
 
-##### <a name="log_retention"></a>`log_retention`
+##### <a name="-duplicacy--repository--log_retention"></a>`log_retention`
 
-Data type: `Optional[String]`
+Data type: `String`
 
 The amount of time to retain logs in the log directory. Note that this is
 simply the age parameter to a
@@ -678,7 +687,7 @@ resource.
 
 Default value: `'4w'`
 
-### <a name="duplicacystorage"></a>`duplicacy::storage`
+### <a name="duplicacy--storage"></a>`duplicacy::storage`
 
 Each repository must have at least one storage backend defined. This
 define handles the initialization of a repository against a specific backend.
@@ -713,40 +722,40 @@ duplicacy::storage { 'my-repo_default':
 
 The following parameters are available in the `duplicacy::storage` defined type:
 
-* [`storage_name`](#storage_name)
-* [`repo_id`](#repo_id)
-* [`repo_path`](#repo_path)
-* [`user`](#user)
-* [`encryption`](#encryption)
-* [`target`](#target)
-* [`chunk_parameters`](#chunk_parameters)
+* [`storage_name`](#-duplicacy--storage--storage_name)
+* [`repo_id`](#-duplicacy--storage--repo_id)
+* [`repo_path`](#-duplicacy--storage--repo_path)
+* [`user`](#-duplicacy--storage--user)
+* [`encryption`](#-duplicacy--storage--encryption)
+* [`target`](#-duplicacy--storage--target)
+* [`chunk_parameters`](#-duplicacy--storage--chunk_parameters)
 
-##### <a name="storage_name"></a>`storage_name`
+##### <a name="-duplicacy--storage--storage_name"></a>`storage_name`
 
 Data type: `String[1]`
 
 Name of this particular storage backend as referenced by duplicacy for this
 specific repository. Note that the backend named 'default' is the primary.
 
-##### <a name="repo_id"></a>`repo_id`
+##### <a name="-duplicacy--storage--repo_id"></a>`repo_id`
 
 Data type: `String[1]`
 
 ID referencing this repository on the target storage backend.
 
-##### <a name="repo_path"></a>`repo_path`
+##### <a name="-duplicacy--storage--repo_path"></a>`repo_path`
 
 Data type: `Stdlib::Absolutepath`
 
 Directory in which this particular repository resides on this machine.
 
-##### <a name="user"></a>`user`
+##### <a name="-duplicacy--storage--user"></a>`user`
 
 Data type: `String[1]`
 
 User to whom this repository belongs.
 
-##### <a name="encryption"></a>`encryption`
+##### <a name="-duplicacy--storage--encryption"></a>`encryption`
 
 Data type: `Optional[Duplicacy::StorageEncryption]`
 
@@ -761,9 +770,9 @@ If this hash is absent the data will not be encrypted.
 See https://github.com/gilbertchen/duplicacy/wiki/Encryption for more
 details.
 
-Default value: ``undef``
+Default value: `undef`
 
-##### <a name="target"></a>`target`
+##### <a name="-duplicacy--storage--target"></a>`target`
 
 Data type: `Duplicacy::StorageTargetType`
 
@@ -775,7 +784,7 @@ b2 specific arguments
 * `b2_id` - ID from your b2 account
 * `b2_app_key` - the application key you generated for this bucket
 
-##### <a name="chunk_parameters"></a>`chunk_parameters`
+##### <a name="-duplicacy--storage--chunk_parameters"></a>`chunk_parameters`
 
 Data type: `Optional[Duplicacy::StorageChunkParams]`
 
@@ -785,96 +794,109 @@ entire hash is optional, as are the sub components.
 * `max` - largest possible chunk size - defaults to $size * 4
 * `min` - smallest possible chunk size - defaults to $size / 4
 
-Default value: ``undef``
+Default value: `undef`
 
 ## Data types
 
-### <a name="duplicacyb2url"></a>`Duplicacy::B2Url`
+### <a name="Duplicacy--B2Url"></a>`Duplicacy::B2Url`
 
 Backblaze b2 url - currently the only supported target type
 
-Alias of
+Alias of `Pattern[/(?i:^b2:\/\/)/]`
 
-```puppet
-Pattern[/(?i:^b2:\/\/)/]
-```
-
-### <a name="duplicacybackupschedule"></a>`Duplicacy::BackupSchedule`
+### <a name="Duplicacy--BackupSchedule"></a>`Duplicacy::BackupSchedule`
 
 Backup schedule for a given storage target
 
 Alias of
 
 ```puppet
-Struct[=>]
+Struct[storage_name              => String,
+  cron_entry                => Duplicacy::ScheduleEntry,
+  Optional[backup_tag]      => String,
+  Optional[threads]         => Integer,
+  Optional[hash_mode]       => Boolean,
+  Optional[limit_rate]      => Integer,
+  Optional[email_recipient] => String]
 ```
 
-### <a name="duplicacyemailrecipient"></a>`Duplicacy::EmailRecipient`
+### <a name="Duplicacy--EmailRecipient"></a>`Duplicacy::EmailRecipient`
 
 A valid email address
 
-Alias of
+Alias of `Pattern[/[[:alnum:]._%+-]+@[[:alnum:].-]+\.[[:alnum:]]{2,}/]`
 
-```puppet
-Pattern[/[[:alnum:]._%+-]+@[[:alnum:].-]+\.[[:alnum:]]{2,}/]
-```
-
-### <a name="duplicacykeeprange"></a>`Duplicacy::KeepRange`
+### <a name="Duplicacy--KeepRange"></a>`Duplicacy::KeepRange`
 
 Prune job parameters
 
 Alias of
 
 ```puppet
-Struct[=>]
+Struct[interval => Integer,
+  min_age  => Integer]
 ```
 
 #### Parameters
 
 The following parameters are available in the `Duplicacy::KeepRange` data type:
 
-* [`interval`](#interval)
-* [`min_age`](#min_age)
+* [`interval`](#-Duplicacy--KeepRange--interval)
+* [`min_age`](#-Duplicacy--KeepRange--min_age)
 
-##### <a name="interval"></a>`interval`
+##### <a name="-Duplicacy--KeepRange--interval"></a>`interval`
 
 One snapshot will be kept for each interval of this length in days
 
-##### <a name="min_age"></a>`min_age`
+##### <a name="-Duplicacy--KeepRange--min_age"></a>`min_age`
 
 This policy applies to snapshots at least this number of days old
 
-### <a name="duplicacypruneschedule"></a>`Duplicacy::PruneSchedule`
+### <a name="Duplicacy--PruneSchedule"></a>`Duplicacy::PruneSchedule`
 
 Prune schedule entry
 
 Alias of
 
 ```puppet
-Struct[=>]
+Struct[schedules                 => Hash[String, Duplicacy::PruneScheduleEntry],
+  Optional[exhaustive]      => Boolean,
+  keep_ranges               => Array[Duplicacy::KeepRange],
+  Optional[backup_tags]     => Array[String],
+  Optional[threads]         => Integer,
+  Optional[email_recipient] => Duplicacy::EmailRecipient]
 ```
 
-### <a name="duplicacyprunescheduleentry"></a>`Duplicacy::PruneScheduleEntry`
+### <a name="Duplicacy--PruneScheduleEntry"></a>`Duplicacy::PruneScheduleEntry`
 
 Schedule prune jobs against this or other repos in the same storage
 
 Alias of
 
 ```puppet
-Struct[=>]
+Struct[Optional[repo_id]      => Duplicacy::SnapshotID,
+  Optional[storage_name] => String,
+  cron_entry             => Duplicacy::ScheduleEntry]
 ```
 
-### <a name="duplicacyrepositoryentry"></a>`Duplicacy::RepositoryEntry`
+### <a name="Duplicacy--RepositoryEntry"></a>`Duplicacy::RepositoryEntry`
 
 Configures a directory as a duplicacy backup repository
 
 Alias of
 
 ```puppet
-Struct[=>]
+Struct[repo_path                  => Stdlib::AbsolutePath,
+  Optional[repo_id]          => Duplicacy::SnapshotID,
+  user                       => String,
+  storage_targets            => Hash[String, Duplicacy::StorageTarget],
+  Optional[backup_schedules] => Hash[String, Duplicacy::BackupSchedule],
+  Optional[prune_schedules]  => Hash[String, Duplicacy::PruneSchedule],
+  Optional[filter_rules]     => Array[String],
+  Optional[log_retention]    => String]
 ```
 
-### <a name="duplicacyscheduleentry"></a>`Duplicacy::ScheduleEntry`
+### <a name="Duplicacy--ScheduleEntry"></a>`Duplicacy::ScheduleEntry`
 
 A basic alias for the cron resource type
 
@@ -888,47 +910,48 @@ Hash[String, Variant[
   ]]
 ```
 
-### <a name="duplicacysnapshotid"></a>`Duplicacy::SnapshotID`
+### <a name="Duplicacy--SnapshotID"></a>`Duplicacy::SnapshotID`
 
 Name of the backup repository associated with this storage
 
-Alias of
+Alias of `Pattern[/[a-zA-Z_-]+/]`
 
-```puppet
-Pattern[/[a-zA-Z_-]+/]
-```
-
-### <a name="duplicacystoragechunkparams"></a>`Duplicacy::StorageChunkParams`
+### <a name="Duplicacy--StorageChunkParams"></a>`Duplicacy::StorageChunkParams`
 
 Configure the attributes of chunks for this storage target
 
 Alias of
 
 ```puppet
-Struct[=>]
+Struct[Optional[size] => Integer,
+  Optional[max]  => Integer,
+  Optional[min]  => Integer]
 ```
 
-### <a name="duplicacystorageencryption"></a>`Duplicacy::StorageEncryption`
+### <a name="Duplicacy--StorageEncryption"></a>`Duplicacy::StorageEncryption`
 
 Configure encryption for the given storage
 
 Alias of
 
 ```puppet
-Struct[=>]
+Struct[password             => String,
+  Optional[iterations] => Integer]
 ```
 
-### <a name="duplicacystoragetarget"></a>`Duplicacy::StorageTarget`
+### <a name="Duplicacy--StorageTarget"></a>`Duplicacy::StorageTarget`
 
 A specific backend storage for the current repository
 
 Alias of
 
 ```puppet
-Struct[=>]
+Struct[target                     => Duplicacy::StorageTargetType,
+  Optional[encryption]       => Duplicacy::StorageEncryption,
+  Optional[chunk_parameters] => Duplicacy::StorageChunkParams]
 ```
 
-### <a name="duplicacystoragetargetb2"></a>`Duplicacy::StorageTargetB2`
+### <a name="Duplicacy--StorageTargetB2"></a>`Duplicacy::StorageTargetB2`
 
 Hash containing a number of details for the target system. Currently only b2
 is supported by this module.
@@ -941,16 +964,14 @@ b2 specific arguments
 Alias of
 
 ```puppet
-Struct[=>]
+Struct[url        => Duplicacy::B2Url,
+  b2_id      => String,
+  b2_app_key => String]
 ```
 
-### <a name="duplicacystoragetargettype"></a>`Duplicacy::StorageTargetType`
+### <a name="Duplicacy--StorageTargetType"></a>`Duplicacy::StorageTargetType`
 
 Possible storage target types
 
-Alias of
-
-```puppet
-Variant[Duplicacy::StorageTargetB2]
-```
+Alias of `Variant[Duplicacy::StorageTargetB2]`
 
